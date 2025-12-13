@@ -193,5 +193,14 @@
 <p class="p1"><span class="Apple-converted-space">      </span>color: #a9a9d6;</p>
 <p class="p1"><span class="Apple-converted-space">      </span>font-size: 1.4rem;</p>
 <p class="p2"><span class="Apple-converted-space">     </span></p>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .catch(console.error);
+    });
+  }
+</script>
 </body>
 </html>
