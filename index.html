@@ -321,7 +321,7 @@
       <p>2. <strong>Задержка</strong> — 4 сек</p>
       <p>3. <strong>Выдох</strong> — 4 сек</p>
       <p>4. <strong>Задержка</strong> — 4 сек</p>
-      <p>Нажмите ⚙️ для выбора частоты и настройки громкости.</p>
+      <p>Нажмите ⚙️ для настройки громкости звука.</p>
     </div>
   </div>
 
@@ -330,14 +330,10 @@
       <button class="modal-close" id="settings-close">✕</button>
       <h2>Настройки звука</h2>
 
+      <!-- ТОЛЬКО ОДИН ПОЛЗУНОК: громкость ханга -->
       <div class="volume-control">
-        <label for="bg-volume">Громкость фона (чакральные тона)</label>
-        <input type="range" id="bg-volume" min="0" max="100" value="15">
-      </div>
-
-      <div class="volume-control">
-        <label for="breath-volume">Громкость звука ханга</label>
-        <input type="range" id="breath-volume" min="0" max="100" value="50">
+        <label for="breath-volume">Громкость звука сегментов</label>
+        <input type="range" id="breath-volume" min="0" max="50" value="30">
       </div>
 
       <div id="chakra-mode">
@@ -367,12 +363,9 @@
     let fullChakraCycle = false;
     let chakraCycleInterval = null;
 
-    // Новые переменные для плавного фона
-    let currentBackgroundOscillator = null;
-    let currentBackgroundGain = null;
-
-    let bgVolumeLevel = 0.15;
-    let hangVolumeLevel = 0.5;
+    // Фиксированная громкость фона: 10% от максимума
+    const BG_VOLUME = 0.1; // 10%
+    let hangVolumeLevel = 0.3; // значение по умолчанию (30 из 50)
 
     const sectors = [
       document.getElementById('sector1'),
@@ -395,6 +388,9 @@
       { name: "Единство", hz: 963, color: "linear-gradient(45deg, #ffd700, #ffed00)" }
     ];
 
+    let currentBackgroundOscillator = null;
+    let currentBackgroundGain = null;
+
     function buildChakraSequence() {
       const up = Array.from({length: 9}, (_, i) => i);
       const down = Array.from({length: 7}, (_, i) => 7 - i);
@@ -408,7 +404,8 @@
       }
       const now = audioContext.currentTime;
       const duration = 2.5;
-      const masterGain = hangVolumeLevel * 0.6;
+      // Макс. громкость ханга ограничена 0.5 (50%)
+      const masterGain = hangVolumeLevel / 50 * 0.5 * 0.6;
       const partials = [
         { freq: frequency, amp: 1.0, decay: 2.5 },
         { freq: frequency * 1.5, amp: 0.4, decay: 1.8 },
@@ -440,32 +437,26 @@
       }
     }
 
-    // === ОБНОВЛЁННАЯ ФУНКЦИЯ С ПЛАВНЫМИ ПЕРЕХОДАМИ ===
     function startBackgroundTone(freq) {
       if (isMuted) return;
       initAudio();
       const now = audioContext.currentTime;
-
-      // Затухание текущего тона
       if (currentBackgroundGain) {
         currentBackgroundGain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
         if (currentBackgroundOscillator) {
           currentBackgroundOscillator.stop(now + 1.0);
         }
       }
-
-      // Новый тон с плавным нарастанием
       const newOsc = audioContext.createOscillator();
       const newGain = audioContext.createGain();
       newOsc.type = 'sine';
       newOsc.frequency.setValueAtTime(freq, now);
+      // Фиксированная громкость: 10% → 0.1 * 0.12 = 0.012
       newGain.gain.setValueAtTime(0, now);
-      newGain.gain.linearRampToValueAtTime(bgVolumeLevel * 0.12, now + 1.0);
-
+      newGain.gain.linearRampToValueAtTime(BG_VOLUME * 0.12, now + 1.0);
       newOsc.connect(newGain);
       newGain.connect(audioContext.destination);
       newOsc.start(now);
-
       currentBackgroundOscillator = newOsc;
       currentBackgroundGain = newGain;
     }
@@ -518,7 +509,6 @@
     const helpModal = document.getElementById('help-modal');
     const settingsModal = document.getElementById('settings-modal');
     const chakraList = document.getElementById('chakra-list');
-    const bgVolumeSlider = document.getElementById('bg-volume');
     const breathVolumeSlider = document.getElementById('breath-volume');
     const fullChakraCheckbox = document.getElementById('full-chakra-cycle');
 
@@ -564,6 +554,10 @@
       }
     });
 
+    breathVolumeSlider.addEventListener('input', () => {
+      hangVolumeLevel = parseFloat(breathVolumeSlider.value);
+    });
+
     function openModal(modal) {
       modal.classList.add('show');
       document.body.style.overflow = 'hidden';
@@ -580,17 +574,6 @@
     document.getElementById('settings-btn').addEventListener('click', () => openModal(settingsModal));
     document.getElementById('settings-close').addEventListener('click', () => closeModal(settingsModal));
     settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) closeModal(settingsModal); });
-
-    bgVolumeSlider.addEventListener('input', () => {
-      bgVolumeLevel = bgVolumeSlider.value / 100;
-      if (!isPaused && endTime && !isMuted) {
-        startBackgroundTone(currentFrequency);
-      }
-    });
-
-    breathVolumeSlider.addEventListener('input', () => {
-      hangVolumeLevel = breathVolumeSlider.value / 100;
-    });
 
     const durationControls = document.getElementById('duration-controls');
     const playBtn = document.getElementById('play-btn');
@@ -736,7 +719,6 @@
     document.querySelector('.chakra-item[data-hz="396"]').classList.add('active');
   </script>
 
-  <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
