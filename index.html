@@ -249,6 +249,20 @@
       opacity: 0.8;
     }
 
+    #chakra-mode {
+      margin: 16px 0;
+      text-align: left;
+    }
+    #chakra-mode label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+    #chakra-mode input {
+      accent-color: #4cc9f0;
+    }
+
     #message {
       margin-top: 20px;
       font-size: 1.1rem;
@@ -326,6 +340,13 @@
         <input type="range" id="breath-volume" min="0" max="100" value="50">
       </div>
 
+      <div id="chakra-mode">
+        <label>
+          <input type="checkbox" id="full-chakra-cycle">
+          Полный цикл чакр (вверх и вниз)
+        </label>
+      </div>
+
       <h3 style="margin: 20px 0 12px; color: #a9a9d6;">Частота фона:</h3>
       <div id="chakra-list"></div>
     </div>
@@ -346,6 +367,8 @@
     let backgroundOscillator = null;
     let backgroundGain = null;
     let currentFrequency = 396;
+    let fullChakraCycle = false; // новая переменная
+    let chakraCycleInterval = null;
 
     let bgVolumeLevel = 0.15;
     let hangVolumeLevel = 0.5;
@@ -370,6 +393,13 @@
       { name: "Космос", hz: 852, color: "#00ffff" },
       { name: "Единство", hz: 963, color: "linear-gradient(45deg, #ffd700, #ffed00)" }
     ];
+
+    // Построение последовательности: 0,1,2,...,8,7,6,...,1 (индексы)
+    function buildChakraSequence() {
+      const up = Array.from({length: 9}, (_, i) => i);
+      const down = Array.from({length: 7}, (_, i) => 7 - i);
+      return [...up, ...down]; // 17 шагов
+    }
 
     function playHangSound(frequency) {
       if (isMuted || typeof window.AudioContext === 'undefined') return;
@@ -445,11 +475,41 @@
       });
     }
 
+    // === НОВАЯ ЛОГИКА: ЦИКЛ ЧАКР ===
+    function startChakraCycle(totalMs) {
+      if (!fullChakraCycle) return;
+      stopChakraCycle();
+
+      const sequence = buildChakraSequence(); // 17 шагов
+      const stepMs = totalMs / sequence.length;
+      let stepIndex = 0;
+
+      // Запуск первой чакры
+      currentFrequency = chakras[sequence[stepIndex]].hz;
+      if (!isMuted) startBackgroundTone(currentFrequency);
+
+      chakraCycleInterval = setInterval(() => {
+        if (isPaused) return;
+        stepIndex = (stepIndex + 1) % sequence.length;
+        currentFrequency = chakras[sequence[stepIndex]].hz;
+        if (!isMuted) startBackgroundTone(currentFrequency);
+      }, stepMs);
+    }
+
+    function stopChakraCycle() {
+      if (chakraCycleInterval) {
+        clearInterval(chakraCycleInterval);
+        chakraCycleInterval = null;
+      }
+    }
+
+    // === МОДАЛЬНЫЕ ОКНА ===
     const helpModal = document.getElementById('help-modal');
     const settingsModal = document.getElementById('settings-modal');
     const chakraList = document.getElementById('chakra-list');
     const bgVolumeSlider = document.getElementById('bg-volume');
     const breathVolumeSlider = document.getElementById('breath-volume');
+    const fullChakraCheckbox = document.getElementById('full-chakra-cycle');
 
     chakras.forEach((chakra, index) => {
       const item = document.createElement('div');
@@ -469,14 +529,27 @@
       item.appendChild(colorDiv);
       item.appendChild(infoDiv);
       chakraList.appendChild(item);
+
       item.addEventListener('click', () => {
+        if (fullChakraCheckbox.checked) {
+          showMessage("Отключите «Полный цикл», чтобы выбрать частоту");
+          return;
+        }
         document.querySelectorAll('.chakra-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
         currentFrequency = chakra.hz;
-        if (!isPaused && endTime) {
+        if (!isPaused && endTime && !isMuted) {
           startBackgroundTone(currentFrequency);
         }
       });
+    });
+
+    fullChakraCheckbox.addEventListener('change', () => {
+      fullChakraCycle = fullChakraCheckbox.checked;
+      // Отключаем выделение при включении цикла
+      if (fullChakraCycle) {
+        document.querySelectorAll('.chakra-item').forEach(i => i.classList.remove('active'));
+      }
     });
 
     function openModal(modal) {
@@ -507,6 +580,7 @@
       hangVolumeLevel = breathVolumeSlider.value / 100;
     });
 
+    // === ОСНОВНАЯ ЛОГИКА ===
     const durationControls = document.getElementById('duration-controls');
     const playBtn = document.getElementById('play-btn');
     const sessionControls = document.getElementById('session-controls');
@@ -515,22 +589,33 @@
       stopSession();
       sectors.forEach(s => s.classList.remove('active'));
       document.getElementById('message').classList.remove('show');
+
       totalMs = durationMs;
       startTime = Date.now();
       endTime = startTime + totalMs;
       isPaused = false;
+
       currentPhaseIndex = 0;
       highlightSector(currentPhaseIndex);
       playHangSound(hangNotes[currentPhaseIndex]);
-      if (!isMuted) startBackgroundTone(currentFrequency);
+
+      // Запуск фона в зависимости от режима
+      if (fullChakraCycle) {
+        startChakraCycle(totalMs);
+      } else {
+        if (!isMuted) startBackgroundTone(currentFrequency);
+      }
+
       phaseInterval = setInterval(() => {
         if (isPaused) return;
         currentPhaseIndex = (currentPhaseIndex + 1) % 4;
         highlightSector(currentPhaseIndex);
         playHangSound(hangNotes[currentPhaseIndex]);
       }, phaseDuration);
+
       timerInterval = setInterval(updateTimer, 250);
       updateTimer();
+
       document.getElementById('pause-btn').textContent = '⏸ Пауза';
       document.getElementById('mute-btn').textContent = isMuted ? '🔈 Со звуком' : '🔇 Без звука';
     }
@@ -541,11 +626,16 @@
         startTime = Date.now() - (totalMs - (endTime - Date.now()));
         endTime = startTime + totalMs;
         isPaused = false;
-        if (!isMuted) startBackgroundTone(currentFrequency);
+        if (fullChakraCycle) {
+          startChakraCycle(totalMs);
+        } else if (!isMuted) {
+          startBackgroundTone(currentFrequency);
+        }
         document.getElementById('pause-btn').textContent = '⏸ Пауза';
       } else {
         isPaused = true;
         stopBackgroundTone();
+        stopChakraCycle();
         document.getElementById('pause-btn').textContent = '▶ Возобновить';
       }
     }
@@ -558,6 +648,7 @@
       endTime = null;
       isPaused = false;
       stopBackgroundTone();
+      stopChakraCycle();
     }
 
     function resetToStart() {
@@ -622,7 +713,9 @@
         stopBackgroundTone();
         document.getElementById('mute-btn').textContent = '🔈 Со звуком';
       } else {
-        if (!isPaused && endTime) {
+        if (fullChakraCycle) {
+          startChakraCycle(totalMs);
+        } else if (!isPaused && endTime) {
           startBackgroundTone(currentFrequency);
         }
         document.getElementById('mute-btn').textContent = '🔇 Без звука';
