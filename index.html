@@ -638,17 +638,15 @@
     });
 
     document.querySelector('.chakra-item[data-hz="396"]').classList.add('active');
-  </script>
+ 
 
   <!-- Service Worker для PWA (оффлайн и установка) -->
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('SW зарегистрирован:', reg.scope))
-          .catch(err => console.warn('Ошибка регистрации SW:', err));
-      });
-    }
-  </script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js');
+    });
+  }
+</script>
 </body>
 </html>
