@@ -1,206 +1,654 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="ru">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2113">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Квадратное Дыхание</title>
+  <meta name="description" content="Практика с звуками ханга и чакральными частотами">
+
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#1a1a2e">
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%234cc9f0'/></svg>">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #0f0f1b;
+      color: #e0e0ff;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow: hidden;
+    }
+    #app {
+      text-align: center;
+      width: 100%;
+      max-width: 500px;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      opacity: 0.9;
+    }
+
+    #breath-circle {
+      width: 260px;
+      height: 260px;
+      position: relative;
+      margin: 0 auto 20px;
+    }
+    .sector {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      transform-origin: 100% 100%;
+      clip-path: polygon(0 0, 100% 0, 100% 100%);
+      border-radius: 0 0 0 200px;
+      background: #1a1a2e;
+      opacity: 0.3;
+      transition: 
+        opacity 0.3s cubic-bezier(0.33, 1, 0.68, 1),
+        background-color 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+    .sector.active {
+      opacity: 1;
+    }
+    #sector1 { transform: rotate(0deg); background-color: #4cc9f0; }
+    #sector2 { transform: rotate(90deg); background-color: #a9a9d6; }
+    #sector3 { transform: rotate(180deg); background-color: #f72585; }
+    #sector4 { transform: rotate(270deg); background-color: #a9a9d6; }
+
+    #timer {
+      font-size: 1.2rem;
+      margin: 16px 0;
+      letter-spacing: 1px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    button {
+      background: #16213e;
+      color: #e0e0ff;
+      border: 1px solid #4cc9f0;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #0f172a;
+    }
+    button.active {
+      background: #4cc9f0;
+      color: #0f0f1b;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #play-btn {
+      background: #4cc9f0;
+      color: #0f0f1b;
+      font-size: 1.2rem;
+      padding: 10px 24px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .bottom-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(22, 33, 62, 0.7);
+      border: 1px solid #4cc9f0;
+      color: #4cc9f0;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .icon-btn:hover {
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 15, 27, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .modal.show {
+      display: flex;
+      opacity: 1;
+    }
+    .modal-content {
+      background: #16213e;
+      border: 1px solid #4cc9f0;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 90%;
+      width: 340px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal h2 {
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      color: #4cc9f0;
+      text-align: center;
+    }
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: none;
+      border: none;
+      color: #a9a9d6;
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+    .modal-close:hover {
+      color: #f72585;
+    }
+
+    .volume-control {
+      margin-bottom: 20px;
+    }
+    .volume-control label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 1.05rem;
+    }
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      background: #2a2a4a;
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #4cc9f0;
+      cursor: pointer;
+    }
+
+    #chakra-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .chakra-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px;
+      border-radius: 10px;
+      background: rgba(22, 33, 62, 0.4);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .chakra-item:hover {
+      background: rgba(22, 33, 62, 0.7);
+    }
+    .chakra-item.active {
+      background: rgba(76, 201, 240, 0.2);
+      border: 1px solid #4cc9f0;
+    }
+    .chakra-color {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .chakra-info {
+      text-align: left;
+      font-size: 0.95rem;
+    }
+    .chakra-name {
+      font-weight: 600;
+    }
+    .chakra-hz {
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+
+    #message {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      min-height: 26px;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    #message.show {
+      opacity: 1;
+    }
+
+    .hidden {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="ru"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Квадратное Дыхание&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="description" content="Практика с звуками ханга и чакральными частотами"&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- PWA manifest --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;link rel="manifest" href="manifest.json"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;link rel="apple-touch-icon" href="icon-192.png"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="theme-color" content="#1a1a2e"&gt;</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;link rel="icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;circle cx='50' cy='50' r='45' fill='%234cc9f0'/&gt;&lt;/svg&gt;"&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>* {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>margin: 0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>padding: 0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>box-sizing: border-box;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>body {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>background-color: #0f0f1b;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>color: #e0e0ff;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>font-family: 'Segoe UI', system-ui, sans-serif;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>min-height: 100vh;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>flex-direction: column;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>justify-content: center;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>padding: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>overflow: hidden;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>#app {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>max-width: 500px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>h1 {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>font-size: 1.8rem;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>margin-bottom: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>opacity: 0.9;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>#breath-circle {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>width: 260px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>height: 260px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>position: relative;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>margin: 0 auto 20px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.sector {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>position: absolute;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>width: 50%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>height: 50%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>transform-origin: 100% 100%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>clip-path: polygon(0 0, 100% 0, 100% 100%);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 0 0 0 200px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>background: #1a1a2e;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>opacity: 0.3;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>transition:<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>opacity 0.3s cubic-bezier(0.33, 1, 0.68, 1),</p>
-<p class="p1"><span class="Apple-converted-space">        </span>background-color 0.3s cubic-bezier(0.33, 1, 0.68, 1);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.sector.active {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>opacity: 1;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>#sector1 { transform: rotate(0deg); background-color: #4cc9f0; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>#sector2 { transform: rotate(90deg); background-color: #a9a9d6; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>#sector3 { transform: rotate(180deg); background-color: #f72585; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>#sector4 { transform: rotate(270deg); background-color: #a9a9d6; }</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>#timer {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>font-size: 1.2rem;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>margin: 16px 0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>letter-spacing: 1px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>.controls {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>flex-wrap: wrap;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>gap: 8px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>justify-content: center;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>margin-top: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>button {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>background: #16213e;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>color: #e0e0ff;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>border: 1px solid #4cc9f0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>padding: 6px 14px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>font-size: 0.95rem;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>transition: background 0.2s;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>button:hover {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>background: #0f172a;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>button.active {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>background: #4cc9f0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>color: #0f0f1b;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>button:disabled {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>opacity: 0.5;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>cursor: not-allowed;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>#play-btn {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>background: #4cc9f0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>color: #0f0f1b;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>font-size: 1.2rem;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>padding: 10px 24px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>margin-top: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>display: none;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>.bottom-buttons {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>gap: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>margin-top: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.icon-btn {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>width: 36px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>height: 36px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 50%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>background: rgba(22, 33, 62, 0.7);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>border: 1px solid #4cc9f0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>color: #4cc9f0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>font-size: 1.2rem;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>justify-content: center;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>transition: background 0.2s;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.icon-btn:hover {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>background: rgba(15, 23, 42, 0.9);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>.modal {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>position: fixed;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>top: 0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>left: 0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>height: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>background: rgba(15, 15, 27, 0.85);</p>
-<p class="p1"><span class="Apple-converted-space">      </span>display: none;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>justify-content: center;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>z-index: 1000;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>opacity: 0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>transition: opacity 0.3s;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.modal.show {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>opacity: 1;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.modal-content {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>background: #16213e;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>border: 1px solid #4cc9f0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>padding: 24px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>max-width: 90%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>width: 340px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>max-height: 80vh;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>overflow-y: auto;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.modal h2 {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>font-size: 1.4rem;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>margin-bottom: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>color: #4cc9f0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.modal-close {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>position: absolute;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>top: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>right: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>background: none;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>color: #a9a9d6;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>font-size: 1.4rem;</p>
-<p class="p2"><span class="Apple-converted-space">     </span></p>
+  <div id="app">
+    <h1>Квадратное Дыхание</h1>
+    <div id="breath-circle">
+      <div class="sector" id="sector1"></div>
+      <div class="sector" id="sector2"></div>
+      <div class="sector" id="sector3"></div>
+      <div class="sector" id="sector4"></div>
+    </div>
+    <div id="timer">00:00</div>
 
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .catch(console.error);
+    <div id="duration-controls" class="controls">
+      <button data-mins="10">10 мин</button>
+      <button data-mins="20">20 мин</button>
+      <button data-mins="30">30 мин</button>
+      <button data-mins="60">1 час</button>
+    </div>
+
+    <button id="play-btn">▶ Начать</button>
+
+    <div id="session-controls" class="controls hidden" style="margin-top: 12px;">
+      <button id="pause-btn">⏸ Пауза</button>
+      <button id="stop-btn">⏹ Стоп</button>
+      <button id="mute-btn">🔇 Без звука</button>
+    </div>
+
+    <div class="bottom-buttons">
+      <button id="help-btn" class="icon-btn" aria-label="Инструкция">?</button>
+      <button id="settings-btn" class="icon-btn" aria-label="Настройки">⚙️</button>
+    </div>
+    <div id="message"></div>
+  </div>
+
+  <div id="help-modal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" id="help-close">✕</button>
+      <h2>Квадратное дыхание</h2>
+      <p><strong>4–4–4–4:</strong></p>
+      <p>1. <strong>Вдох</strong> — 4 сек</p>
+      <p>2. <strong>Задержка</strong> — 4 сек</p>
+      <p>3. <strong>Выдох</strong> — 4 сек</p>
+      <p>4. <strong>Задержка</strong> — 4 сек</p>
+      <p>Нажмите ⚙️ для выбора частоты и настройки громкости.</p>
+    </div>
+  </div>
+
+  <div id="settings-modal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" id="settings-close">✕</button>
+      <h2>Настройки звука</h2>
+
+      <div class="volume-control">
+        <label for="bg-volume">Громкость фона (чакральные тона)</label>
+        <input type="range" id="bg-volume" min="0" max="100" value="15">
+      </div>
+
+      <div class="volume-control">
+        <label for="breath-volume">Громкость звука ханга</label>
+        <input type="range" id="breath-volume" min="0" max="100" value="50">
+      </div>
+
+      <h3 style="margin: 20px 0 12px; color: #a9a9d6;">Частота фона:</h3>
+      <div id="chakra-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const phaseDuration = 4000;
+    let totalMs = null;
+    let endTime = null;
+    let startTime = null;
+    let timerInterval = null;
+    let phaseInterval = null;
+    let isMuted = false;
+    let isPaused = false;
+    let audioContext = null;
+    let currentPhaseIndex = 0;
+    let selectedDuration = null;
+    let backgroundOscillator = null;
+    let backgroundGain = null;
+    let currentFrequency = 396;
+
+    let bgVolumeLevel = 0.15;
+    let hangVolumeLevel = 0.5;
+
+    const sectors = [
+      document.getElementById('sector1'),
+      document.getElementById('sector2'),
+      document.getElementById('sector3'),
+      document.getElementById('sector4')
+    ];
+
+    const hangNotes = [293.7, 349.2, 392.0, 466.2];
+
+    const chakras = [
+      { name: "Муладхара", hz: 174, color: "#ff0000" },
+      { name: "Свадхистхана", hz: 285, color: "#ff8000" },
+      { name: "Манипура", hz: 396, color: "#ffff00" },
+      { name: "Анахата", hz: 417, color: "#00ff00" },
+      { name: "Вишудха", hz: 528, color: "#00ffff" },
+      { name: "Аджна", hz: 639, color: "#0000ff" },
+      { name: "Сахасрара", hz: 741, color: "#8000ff" },
+      { name: "Космос", hz: 852, color: "#00ffff" },
+      { name: "Единство", hz: 963, color: "linear-gradient(45deg, #ffd700, #ffed00)" }
+    ];
+
+    function playHangSound(frequency) {
+      if (isMuted || typeof window.AudioContext === 'undefined') return;
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      const now = audioContext.currentTime;
+      const duration = 2.5;
+      const masterGain = hangVolumeLevel * 0.6;
+      const partials = [
+        { freq: frequency, amp: 1.0, decay: 2.5 },
+        { freq: frequency * 1.5, amp: 0.4, decay: 1.8 },
+        { freq: frequency * 2.0, amp: 0.25, decay: 1.2 }
+      ];
+      partials.forEach(p => {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        const filter = audioContext.createBiquadFilter();
+        osc.type = 'sine';
+        osc.frequency.value = p.freq;
+        filter.type = 'lowpass';
+        filter.frequency.value = p.freq * 3;
+        filter.Q.value = 0.5;
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(masterGain * p.amp, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + p.decay);
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      });
+    }
+
+    function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function startBackgroundTone(freq) {
+      if (isMuted) return;
+      initAudio();
+      stopBackgroundTone();
+      backgroundOscillator = audioContext.createOscillator();
+      backgroundGain = audioContext.createGain();
+      backgroundOscillator.type = 'sine';
+      backgroundOscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+      backgroundGain.gain.setValueAtTime(bgVolumeLevel * 0.12, audioContext.currentTime);
+      backgroundOscillator.connect(backgroundGain);
+      backgroundGain.connect(audioContext.destination);
+      backgroundOscillator.start(audioContext.currentTime);
+    }
+
+    function stopBackgroundTone() {
+      if (backgroundOscillator) {
+        if (backgroundGain) {
+          backgroundGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1);
+        }
+        backgroundOscillator.stop(audioContext.currentTime + 1);
+        backgroundOscillator = null;
+        backgroundGain = null;
+      }
+    }
+
+    function highlightSector(index) {
+      sectors.forEach((s, i) => {
+        if (i === index) {
+          setTimeout(() => s.classList.add('active'), 50);
+        } else {
+          s.classList.remove('active');
+        }
+      });
+    }
+
+    const helpModal = document.getElementById('help-modal');
+    const settingsModal = document.getElementById('settings-modal');
+    const chakraList = document.getElementById('chakra-list');
+    const bgVolumeSlider = document.getElementById('bg-volume');
+    const breathVolumeSlider = document.getElementById('breath-volume');
+
+    chakras.forEach((chakra, index) => {
+      const item = document.createElement('div');
+      item.className = 'chakra-item';
+      if (chakra.hz === currentFrequency) item.classList.add('active');
+      item.dataset.hz = chakra.hz;
+      const colorDiv = document.createElement('div');
+      colorDiv.className = 'chakra-color';
+      if (chakra.color.includes('gradient')) {
+        colorDiv.style.background = chakra.color;
+      } else {
+        colorDiv.style.backgroundColor = chakra.color;
+      }
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'chakra-info';
+      infoDiv.innerHTML = `<div class="chakra-name">${chakra.name}</div><div class="chakra-hz">${chakra.hz} Гц</div>`;
+      item.appendChild(colorDiv);
+      item.appendChild(infoDiv);
+      chakraList.appendChild(item);
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.chakra-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        currentFrequency = chakra.hz;
+        if (!isPaused && endTime) {
+          startBackgroundTone(currentFrequency);
+        }
+      });
     });
-  }
-</script>
+
+    function openModal(modal) {
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(modal) {
+      modal.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('help-btn').addEventListener('click', () => openModal(helpModal));
+    document.getElementById('help-close').addEventListener('click', () => closeModal(helpModal));
+    helpModal.addEventListener('click', (e) => { if (e.target === helpModal) closeModal(helpModal); });
+
+    document.getElementById('settings-btn').addEventListener('click', () => openModal(settingsModal));
+    document.getElementById('settings-close').addEventListener('click', () => closeModal(settingsModal));
+    settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) closeModal(settingsModal); });
+
+    bgVolumeSlider.addEventListener('input', () => {
+      bgVolumeLevel = bgVolumeSlider.value / 100;
+      if (!isPaused && endTime && !isMuted) {
+        startBackgroundTone(currentFrequency);
+      }
+    });
+
+    breathVolumeSlider.addEventListener('input', () => {
+      hangVolumeLevel = breathVolumeSlider.value / 100;
+    });
+
+    const durationControls = document.getElementById('duration-controls');
+    const playBtn = document.getElementById('play-btn');
+    const sessionControls = document.getElementById('session-controls');
+
+    function startSession(durationMs) {
+      stopSession();
+      sectors.forEach(s => s.classList.remove('active'));
+      document.getElementById('message').classList.remove('show');
+      totalMs = durationMs;
+      startTime = Date.now();
+      endTime = startTime + totalMs;
+      isPaused = false;
+      currentPhaseIndex = 0;
+      highlightSector(currentPhaseIndex);
+      playHangSound(hangNotes[currentPhaseIndex]);
+      if (!isMuted) startBackgroundTone(currentFrequency);
+      phaseInterval = setInterval(() => {
+        if (isPaused) return;
+        currentPhaseIndex = (currentPhaseIndex + 1) % 4;
+        highlightSector(currentPhaseIndex);
+        playHangSound(hangNotes[currentPhaseIndex]);
+      }, phaseDuration);
+      timerInterval = setInterval(updateTimer, 250);
+      updateTimer();
+      document.getElementById('pause-btn').textContent = '⏸ Пауза';
+      document.getElementById('mute-btn').textContent = isMuted ? '🔈 Со звуком' : '🔇 Без звука';
+    }
+
+    function pauseResumeSession() {
+      if (!endTime) return;
+      if (isPaused) {
+        startTime = Date.now() - (totalMs - (endTime - Date.now()));
+        endTime = startTime + totalMs;
+        isPaused = false;
+        if (!isMuted) startBackgroundTone(currentFrequency);
+        document.getElementById('pause-btn').textContent = '⏸ Пауза';
+      } else {
+        isPaused = true;
+        stopBackgroundTone();
+        document.getElementById('pause-btn').textContent = '▶ Возобновить';
+      }
+    }
+
+    function stopSession() {
+      if (timerInterval) clearInterval(timerInterval);
+      if (phaseInterval) clearInterval(phaseInterval);
+      timerInterval = null;
+      phaseInterval = null;
+      endTime = null;
+      isPaused = false;
+      stopBackgroundTone();
+    }
+
+    function resetToStart() {
+      stopSession();
+      sectors.forEach(s => s.classList.remove('active'));
+      document.getElementById('timer').textContent = '00:00';
+      document.getElementById('message').classList.remove('show');
+      durationControls.classList.remove('hidden');
+      playBtn.classList.add('hidden');
+      sessionControls.classList.add('hidden');
+      document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
+      selectedDuration = null;
+    }
+
+    function updateTimer() {
+      if (isPaused) return;
+      const now = Date.now();
+      let remaining = endTime - now;
+      if (remaining <= 0) {
+        remaining = 0;
+        stopSession();
+        showMessage("Практика завершена. Спасибо за заботу о себе.");
+        setTimeout(resetToStart, 3000);
+        return;
+      }
+      const mins = Math.floor(remaining / 60000);
+      const secs = Math.floor((remaining % 60000) / 1000);
+      document.getElementById('timer').textContent = 
+        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function showMessage(text) {
+      const el = document.getElementById('message');
+      el.textContent = text;
+      el.classList.add('show');
+    }
+
+    document.querySelectorAll('#duration-controls button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedDuration = parseInt(btn.dataset.mins) * 60 * 1000;
+        playBtn.classList.remove('hidden');
+        playBtn.style.display = 'inline-block';
+      });
+    });
+
+    playBtn.addEventListener('click', () => {
+      if (selectedDuration) {
+        startSession(selectedDuration);
+        durationControls.classList.add('hidden');
+        playBtn.classList.add('hidden');
+        sessionControls.classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('pause-btn').addEventListener('click', pauseResumeSession);
+    document.getElementById('stop-btn').addEventListener('click', resetToStart);
+    document.getElementById('mute-btn').addEventListener('click', () => {
+      isMuted = !isMuted;
+      if (isMuted) {
+        stopBackgroundTone();
+        document.getElementById('mute-btn').textContent = '🔈 Со звуком';
+      } else {
+        if (!isPaused && endTime) {
+          startBackgroundTone(currentFrequency);
+        }
+        document.getElementById('mute-btn').textContent = '🔇 Без звука';
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (helpModal.classList.contains('show')) closeModal(helpModal);
+        if (settingsModal.classList.contains('show')) closeModal(settingsModal);
+      }
+    });
+
+    document.querySelector('.chakra-item[data-hz="396"]').classList.add('active');
+  </script>
+
+  <!-- Service Worker для PWA (оффлайн и установка) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('SW зарегистрирован:', reg.scope))
+          .catch(err => console.warn('Ошибка регистрации SW:', err));
+      });
+    }
+  </script>
 </body>
 </html>
