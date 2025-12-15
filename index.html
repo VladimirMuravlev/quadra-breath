@@ -435,8 +435,9 @@
     let selectedDuration = null;
     let fullChakraCycle = false;
     let chakraCycleInterval = null;
+    let phaseStartTime = null; // ← для плавной анимации
 
-    const BG_VOLUME = 0.05; // 5% — тише в наушниках
+    const BG_VOLUME = 0.05;
     let hangVolumeLevel = 0.3;
 
     const sectors = [
@@ -566,36 +567,95 @@
       }
     }
 
-    function highlightSector(index) {
+    // === ПЛАВНАЯ АНИМАЦИЯ "СТРЕЛКИ ЧАСОВ" ===
+    function animateBreathCircle() {
+      if (!phaseStartTime || isPaused) return;
+
+      const now = Date.now();
+      const elapsed = now - phaseStartTime;
+      const progress = (elapsed % phaseDuration) / phaseDuration;
+
       sectors.forEach((s, i) => {
-        if (i === index) {
-          s.classList.remove('active');
-          void s.offsetWidth;
-          s.classList.add('active');
-
-          let startTime = null;
-          const animateGradient = (timestamp) => {
-            if (!startTime) startTime = timestamp;
-            const elapsed = timestamp - startTime;
-            const progress = Math.min(elapsed / 4000, 1);
-
-            const baseHue = 200 + 240 * (index / 4); // уникальный стартовый оттенок на сектор
-            const hue = baseHue + 30 * Math.sin(progress * Math.PI);
-            const lightness = 45 + 25 * Math.sin(progress * Math.PI);
-            const saturation = 80 + 20 * Math.sin(progress * Math.PI);
-
-            s.style.background = `linear-gradient(135deg, hsl(${hue}, ${saturation}%, ${lightness}%), hsl(${hue - 30}, ${saturation}%, ${lightness - 10}%))`;
-
-            if (progress < 1) {
-              requestAnimationFrame(animateGradient);
-            }
-          };
-          requestAnimationFrame(animateGradient);
-        } else {
-          s.classList.remove('active');
-          s.style.background = 'rgba(22, 33, 62, 0.3)';
-        }
+        s.classList.remove('active');
+        s.style.background = '';
       });
+
+      const currentSector = sectors[currentPhaseIndex];
+      currentSector.classList.add('active');
+
+      const baseHue = 200 + 240 * (currentPhaseIndex / 4);
+      const hue = baseHue + 30 * Math.sin(progress * Math.PI);
+      const lightness = 45 + 25 * Math.sin(progress * Math.PI);
+      const saturation = 80 + 20 * Math.sin(progress * Math.PI);
+      currentSector.style.background = `linear-gradient(135deg, hsl(${hue}, ${saturation}%, ${lightness}%), hsl(${hue - 30}, ${saturation}%, ${lightness - 10}%))`;
+
+      requestAnimationFrame(animateBreathCircle);
+    }
+
+    function startSession(durationMs) {
+      stopSession();
+      sectors.forEach(s => {
+        s.classList.remove('active');
+        s.style.background = 'rgba(22, 33, 62, 0.3)';
+      });
+      document.getElementById('message').classList.remove('show');
+
+      totalMs = durationMs;
+      startTime = Date.now();
+      endTime = startTime + totalMs;
+      isPaused = false;
+      currentPhaseIndex = 0;
+      phaseStartTime = Date.now();
+
+      playHangSound(hangNotes[currentPhaseIndex]);
+      if (!isMuted) startBackgroundTone(currentFrequency);
+
+      phaseInterval = setInterval(() => {
+        if (isPaused) return;
+        currentPhaseIndex = (currentPhaseIndex + 1) % 4;
+        playHangSound(hangNotes[currentPhaseIndex]);
+      }, phaseDuration);
+
+      animateBreathCircle();
+
+      timerInterval = setInterval(updateTimer, 250);
+      updateTimer();
+
+      document.getElementById('pause-btn').textContent = '⏸ Пауза';
+      document.getElementById('mute-btn').textContent = isMuted ? '🔈 Со звуком' : '🔇 Без звука';
+    }
+
+    function pauseResumeSession() {
+      if (!endTime) return;
+      if (isPaused) {
+        startTime = Date.now() - (totalMs - (endTime - Date.now()));
+        endTime = startTime + totalMs;
+        isPaused = false;
+        phaseStartTime = Date.now() - (Date.now() - startTime) % phaseDuration;
+        if (!isMuted) {
+          if (fullChakraCycle) startChakraCycle(totalMs);
+          else startBackgroundTone(currentFrequency);
+        }
+        animateBreathCircle();
+        document.getElementById('pause-btn').textContent = '⏸ Пауза';
+      } else {
+        isPaused = true;
+        stopBackgroundTone();
+        stopChakraCycle();
+        document.getElementById('pause-btn').textContent = '▶ Возобновить';
+      }
+    }
+
+    function stopSession() {
+      if (timerInterval) clearInterval(timerInterval);
+      if (phaseInterval) clearInterval(phaseInterval);
+      timerInterval = null;
+      phaseInterval = null;
+      phaseStartTime = null;
+      endTime = null;
+      isPaused = false;
+      stopBackgroundTone();
+      stopChakraCycle();
     }
 
     function startChakraCycle(totalMs) {
@@ -699,77 +759,6 @@
     const playBtn = document.getElementById('play-btn');
     const sessionControls = document.getElementById('session-controls');
 
-    function startSession(durationMs) {
-      stopSession();
-      sectors.forEach(s => s.classList.remove('active'));
-      document.getElementById('message').classList.remove('show');
-      totalMs = durationMs;
-      startTime = Date.now();
-      endTime = startTime + totalMs;
-      isPaused = false;
-      currentPhaseIndex = 0;
-      highlightSector(currentPhaseIndex);
-      playHangSound(hangNotes[currentPhaseIndex]);
-      if (fullChakraCycle) {
-        startChakraCycle(totalMs);
-      } else {
-        if (!isMuted) startBackgroundTone(currentFrequency);
-      }
-      phaseInterval = setInterval(() => {
-        if (isPaused) return;
-        currentPhaseIndex = (currentPhaseIndex + 1) % 4;
-        highlightSector(currentPhaseIndex);
-        playHangSound(hangNotes[currentPhaseIndex]);
-      }, phaseDuration);
-      timerInterval = setInterval(updateTimer, 250);
-      updateTimer();
-      document.getElementById('pause-btn').textContent = '⏸ Пауза';
-      document.getElementById('mute-btn').textContent = isMuted ? '🔈 Со звуком' : '🔇 Без звука';
-    }
-
-    function pauseResumeSession() {
-      if (!endTime) return;
-      if (isPaused) {
-        startTime = Date.now() - (totalMs - (endTime - Date.now()));
-        endTime = startTime + totalMs;
-        isPaused = false;
-        if (fullChakraCycle) {
-          startChakraCycle(totalMs);
-        } else if (!isMuted) {
-          startBackgroundTone(currentFrequency);
-        }
-        document.getElementById('pause-btn').textContent = '⏸ Пауза';
-      } else {
-        isPaused = true;
-        stopBackgroundTone();
-        stopChakraCycle();
-        document.getElementById('pause-btn').textContent = '▶ Возобновить';
-      }
-    }
-
-    function stopSession() {
-      if (timerInterval) clearInterval(timerInterval);
-      if (phaseInterval) clearInterval(phaseInterval);
-      timerInterval = null;
-      phaseInterval = null;
-      endTime = null;
-      isPaused = false;
-      stopBackgroundTone();
-      stopChakraCycle();
-    }
-
-    function resetToStart() {
-      stopSession();
-      sectors.forEach(s => s.classList.remove('active'));
-      document.getElementById('timer').textContent = '00:00';
-      document.getElementById('message').classList.remove('show');
-      durationControls.classList.remove('hidden');
-      playBtn.classList.add('hidden');
-      sessionControls.classList.add('hidden');
-      document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
-      selectedDuration = null;
-    }
-
     function updateTimer() {
       if (isPaused) return;
       const now = Date.now();
@@ -791,6 +780,18 @@
       const el = document.getElementById('message');
       el.textContent = text;
       el.classList.add('show');
+    }
+
+    function resetToStart() {
+      stopSession();
+      sectors.forEach(s => s.classList.remove('active'));
+      document.getElementById('timer').textContent = '00:00';
+      document.getElementById('message').classList.remove('show');
+      durationControls.classList.remove('hidden');
+      playBtn.classList.add('hidden');
+      sessionControls.classList.add('hidden');
+      document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
+      selectedDuration = null;
     }
 
     document.querySelectorAll('#duration-controls button').forEach(btn => {
