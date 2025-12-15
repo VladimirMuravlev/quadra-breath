@@ -480,7 +480,7 @@
 
     <h3 style="margin: 20px 0 12px; color: #4cc9f0;">🎵 Чакральные частоты</h3>
     <p style="opacity: 0.9; margin-bottom: 16px;">
-      На основе исследований (Mirtesen):<br>
+      На основе исследований:<br>
       <strong>174 Гц</strong> — безопасность, <strong>285 Гц</strong> — восстановление,<br>
       <strong>396 Гц</strong> — освобождение, <strong>528 Гц</strong> — трансформация,<br>
       <strong>963 Гц</strong> — ощущение единства.
@@ -713,23 +713,31 @@
   function renderMarathonGrid() {
     const grid = document.getElementById('marathon-grid');
     grid.innerHTML = '';
-    const progress = getMarathonProgress();
+    
+    // Всегда создаём 7 дней
     for (let i = 1; i <= 7; i++) {
       const dayEl = document.createElement('div');
       dayEl.className = 'marathon-day';
-      if (progress.active && progress.days[i]) {
-        dayEl.classList.add('completed');
-        dayEl.textContent = '🌸';
-      } else {
-        dayEl.textContent = i;
-      }
+      dayEl.textContent = i;
       grid.appendChild(dayEl);
+    }
+    
+    // Накладываем прогресс, если есть
+    const progress = getMarathonProgress();
+    if (progress.active) {
+      for (let i = 1; i <= 7; i++) {
+        if (progress.days[i]) {
+          const dayEl = grid.children[i - 1];
+          dayEl.textContent = '🌸';
+          dayEl.classList.add('completed');
+        }
+      }
     }
   }
 
   document.getElementById('start-marathon-btn').addEventListener('click', startMarathon);
 
-  // === ОСТАЛЬНОЙ КОД МЕДИТАЦИИ (без изменений) ===
+  // === МЕДИТАЦИЯ (сокращённо) ===
   const phaseDuration = 4000;
   let totalMs = null;
   let endTime = null;
