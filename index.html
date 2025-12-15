@@ -59,13 +59,16 @@
       transform-origin: 100% 100%;
       clip-path: polygon(0 0, 100% 0, 100% 100%);
       border-radius: 0 0 0 200px;
-      background: rgba(22, 33, 62, 0.3);
       opacity: 0.3;
       transition: opacity 0.3s ease;
     }
     .segment.active {
       opacity: 1;
     }
+    #segment1 { transform: rotate(0deg); background: linear-gradient(135deg, #4cc9f0, #4361ee); }
+    #segment2 { transform: rotate(90deg); background: linear-gradient(135deg, #a9a9d6, #7209b7); }
+    #segment3 { transform: rotate(180deg); background: linear-gradient(135deg, #f72585, #b5179e); }
+    #segment4 { transform: rotate(270deg); background: linear-gradient(135deg, #a9a9d6, #7209b7); }
 
     .center-dot {
       position: absolute;
@@ -577,7 +580,7 @@
 
       sectors.forEach(s => {
         s.classList.remove('active');
-        s.style.background = 'rgba(22, 33, 62, 0.3)';
+        s.style.background = ''; // ← возвращаем CSS-градиент
       });
 
       const currentSector = sectors[currentPhaseIndex];
@@ -596,7 +599,7 @@
       stopSession();
       sectors.forEach(s => {
         s.classList.remove('active');
-        s.style.background = 'rgba(22, 33, 62, 0.3)';
+        s.style.background = ''; // ← CSS остаётся
       });
       document.getElementById('message').classList.remove('show');
 
