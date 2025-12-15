@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Чакровое дыхание по квадрату</title>
+  <title>Квадратное Дыхание</title>
   <meta name="description" content="Практика с звуками ханга и чакральными частотами">
 
   <!-- PWA manifest -->
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="theme-color" content="#1a1a2e">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%234cc9f0'/></svg>">
+  <link rel="icon" href="image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%234cc9f0'/></svg>">
 
   <style>
     * {
@@ -19,8 +19,8 @@
       box-sizing: border-box;
     }
     body {
-      background-color: #0f0f1b;
-      color: #e0e0ff;
+      background: linear-gradient(135deg, #0c0c1a 0%, #1a1a2e 30%, #16213e 70%, #0f0f1b 100%);
+      color: #d0d0f0;
       font-family: 'Segoe UI', system-ui, sans-serif;
       min-height: 100vh;
       display: flex;
@@ -29,70 +29,96 @@
       justify-content: center;
       padding: 16px;
       overflow: hidden;
+      position: relative;
     }
     #app {
       text-align: center;
       width: 100%;
-      max-width: 500px;
+      max-width: 520px;
+      padding: 0 12px;
     }
     h1 {
-      font-size: 1.8rem;
-      margin-bottom: 20px;
-      opacity: 0.9;
+      font-size: 1.9rem;
+      margin-bottom: 22px;
+      opacity: 0.92;
     }
 
     #breath-circle {
       width: 260px;
       height: 260px;
       position: relative;
-      margin: 0 auto 20px;
+      margin: 0 auto 24px;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(76, 201, 240, 0.15);
     }
-    .sector {
+    .segment {
       position: absolute;
       width: 50%;
       height: 50%;
       transform-origin: 100% 100%;
+      background: rgba(22, 33, 62, 0.3);
       clip-path: polygon(0 0, 100% 0, 100% 100%);
       border-radius: 0 0 0 200px;
-      background: #1a1a2e;
-      opacity: 0.3;
       transition: 
-        opacity 0.3s cubic-bezier(0.33, 1, 0.68, 1),
-        background-color 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+        background-color 0.5s ease,
+        opacity 0.5s ease,
+        transform 0.5s ease;
     }
-    .sector.active {
+    .segment.active {
       opacity: 1;
+      transform: scale(1.02);
     }
-    #sector1 { transform: rotate(0deg); background-color: #4cc9f0; }
-    #sector2 { transform: rotate(90deg); background-color: #a9a9d6; }
-    #sector3 { transform: rotate(180deg); background-color: #f72585; }
-    #sector4 { transform: rotate(270deg); background-color: #a9a9d6; }
+    #segment1 { transform: rotate(0deg); background: linear-gradient(135deg, #4cc9f0, #4361ee); }
+    #segment2 { transform: rotate(90deg); background: linear-gradient(135deg, #a9a9d6, #7209b7); }
+    #segment3 { transform: rotate(180deg); background: linear-gradient(135deg, #f72585, #b5179e); }
+    #segment4 { transform: rotate(270deg); background: linear-gradient(135deg, #a9a9d6, #7209b7); }
+
+    .center-dot {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 24px;
+      height: 24px;
+      background: #4cc9f0;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 12px rgba(76, 201, 240, 0.6);
+    }
 
     #timer {
-      font-size: 1.2rem;
-      margin: 16px 0;
+      font-size: 1.25rem;
+      margin: 18px 0;
       letter-spacing: 1px;
+      opacity: 0.9;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      margin: 22px 0 14px;
+      opacity: 0.95;
     }
 
     .controls {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 12px;
       justify-content: center;
       margin-top: 10px;
     }
     button {
-      background: #16213e;
-      color: #e0e0ff;
+      background: rgba(22, 33, 62, 0.6);
+      color: #d0d0f5;
       border: 1px solid #4cc9f0;
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 0.95rem;
+      border-radius: 24px;
+      padding: 10px 20px;
+      font-size: 1.05rem;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.3s ease;
     }
     button:hover {
-      background: #0f172a;
+      background: rgba(30, 40, 80, 0.8);
+      transform: translateY(-2px);
     }
     button.active {
       background: #4cc9f0;
@@ -101,30 +127,35 @@
     button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+      transform: none;
     }
 
     #play-btn {
-      background: #4cc9f0;
-      color: #0f0f1b;
-      font-size: 1.2rem;
-      padding: 10px 24px;
-      margin-top: 12px;
+      background: linear-gradient(120deg, #4361ee, #4cc9f0);
+      color: white;
+      font-size: 1.3rem;
+      padding: 14px 32px;
+      margin-top: 16px;
+      border: none;
+      border-radius: 28px;
+      box-shadow: 0 4px 12px rgba(76, 201, 240, 0.3);
       display: none;
     }
 
     .bottom-buttons {
       display: flex;
-      gap: 12px;
-      margin-top: 16px;
+      gap: 30px;
+      margin-top: 20px;
+      justify-content: center;
     }
     .icon-btn {
-      width: 36px;
-      height: 36px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       background: rgba(22, 33, 62, 0.7);
       border: 1px solid #4cc9f0;
       color: #4cc9f0;
-      font-size: 1.2rem;
+      font-size: 1.4rem;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -141,7 +172,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(15, 15, 27, 0.85);
+      background: rgba(15, 15, 27, 0.88);
       display: none;
       align-items: center;
       justify-content: center;
@@ -156,27 +187,28 @@
     .modal-content {
       background: #16213e;
       border: 1px solid #4cc9f0;
-      border-radius: 16px;
-      padding: 24px;
+      border-radius: 18px;
+      padding: 26px;
       max-width: 90%;
       width: 340px;
       max-height: 80vh;
       overflow-y: auto;
+      color: #d0d0f5;
     }
     .modal h2 {
-      font-size: 1.4rem;
+      font-size: 1.45rem;
       margin-bottom: 20px;
       color: #4cc9f0;
       text-align: center;
     }
     .modal-close {
       position: absolute;
-      top: 12px;
-      right: 12px;
+      top: 14px;
+      right: 14px;
       background: none;
       border: none;
       color: #a9a9d6;
-      font-size: 1.4rem;
+      font-size: 1.5rem;
       cursor: pointer;
     }
     .modal-close:hover {
@@ -184,11 +216,11 @@
     }
 
     .volume-control {
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
     .volume-control label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       font-size: 1.05rem;
     }
     input[type="range"] {
@@ -201,8 +233,8 @@
     }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       background: #4cc9f0;
       cursor: pointer;
@@ -211,15 +243,15 @@
     #chakra-list {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+      gap: 14px;
       margin-top: 12px;
     }
     .chakra-item {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 8px;
-      border-radius: 10px;
+      padding: 10px;
+      border-radius: 12px;
       background: rgba(22, 33, 62, 0.4);
       cursor: pointer;
       transition: background 0.2s;
@@ -232,14 +264,14 @@
       border: 1px solid #4cc9f0;
     }
     .chakra-color {
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       flex-shrink: 0;
     }
     .chakra-info {
       text-align: left;
-      font-size: 0.95rem;
+      font-size: 0.98rem;
     }
     .chakra-name {
       font-weight: 600;
@@ -250,28 +282,29 @@
     }
     .chakra-desc {
       font-size: 0.78rem;
-      opacity: 0.75;
-      margin-top: 4px;
+      opacity: 0.78;
+      margin-top: 5px;
+      line-height: 1.3;
     }
 
     #chakra-mode {
-      margin: 16px 0;
+      margin: 18px 0;
       text-align: left;
     }
     #chakra-mode label {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.95rem;
+      gap: 10px;
+      font-size: 0.98rem;
     }
     #chakra-mode input {
       accent-color: #4cc9f0;
     }
 
     #message {
-      margin-top: 20px;
-      font-size: 1.1rem;
-      min-height: 26px;
+      margin-top: 22px;
+      font-size: 1.15rem;
+      min-height: 28px;
       opacity: 0;
       transition: opacity 0.5s;
     }
@@ -282,37 +315,51 @@
     .hidden {
       display: none !important;
     }
+
+    .bottom-label {
+      font-size: 0.86rem;
+      opacity: 0.82;
+      margin-top: 6px;
+    }
   </style>
 </head>
 <body>
   <div id="app">
-    <h1>Чакровое дыхание по квадрату</h1>
+    <h1>Квадратное Дыхание</h1>
     <div id="breath-circle">
-      <div class="sector" id="sector1"></div>
-      <div class="sector" id="sector2"></div>
-      <div class="sector" id="sector3"></div>
-      <div class="sector" id="sector4"></div>
+      <div class="segment" id="segment1"></div>
+      <div class="segment" id="segment2"></div>
+      <div class="segment" id="segment3"></div>
+      <div class="segment" id="segment4"></div>
+      <div class="center-dot"></div>
     </div>
     <div id="timer">00:00</div>
 
+    <div class="section-title">Выбери время медитации</div>
     <div id="duration-controls" class="controls">
-      <button data-mins="10">10 мин</button>
-      <button data-mins="20">20 мин</button>
-      <button data-mins="30">30 мин</button>
+      <button data-mins="10">10 минут</button>
+      <button data-mins="20">20 минут</button>
+      <button data-mins="30">30 минут</button>
       <button data-mins="60">1 час</button>
     </div>
 
     <button id="play-btn">▶ Начать</button>
 
-    <div id="session-controls" class="controls hidden" style="margin-top: 12px;">
+    <div id="session-controls" class="controls hidden" style="margin-top: 16px;">
       <button id="pause-btn">⏸ Пауза</button>
       <button id="stop-btn">⏹ Стоп</button>
       <button id="mute-btn">🔇 Без звука</button>
     </div>
 
     <div class="bottom-buttons">
-      <button id="help-btn" class="icon-btn" aria-label="Инструкция">?</button>
-      <button id="settings-btn" class="icon-btn" aria-label="Настройки">⚙️</button>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+        <button id="help-btn" class="icon-btn" aria-label="Инструкция">?</button>
+        <span class="bottom-label">Инструкция</span>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+        <button id="settings-btn" class="icon-btn" aria-label="Настройки">⚙️</button>
+        <span class="bottom-label">Настройки</span>
+      </div>
     </div>
     <div id="message"></div>
   </div>
@@ -320,22 +367,22 @@
   <div id="help-modal" class="modal">
     <div class="modal-content">
       <button class="modal-close" id="help-close">✕</button>
-      <h2>Чакровое дыхание по квадрату</h2>
+      <h2>Квадратное дыхание</h2>
       <p><strong>4–4–4–4:</strong></p>
       <p>1. <strong>Вдох</strong> — 4 сек</p>
       <p>2. <strong>Задержка</strong> — 4 сек</p>
       <p>3. <strong>Выдох</strong> — 4 сек</p>
       <p>4. <strong>Задержка</strong> — 4 сек</p>
 
-      <p style="margin-top: 16px; font-size: 0.95rem; opacity: 0.9;">
+      <p style="margin-top: 16px; font-size: 0.96rem; opacity: 0.9;">
         Этот ритм успокаивает нервную систему, снижает тревожность и улучшает концентрацию.
       </p>
 
-      <h3 style="margin: 16px 0 8px; color: #4cc9f0; font-size: 1.1rem;">🌀 Полный цикл чакр</h3>
-      <p style="font-size: 0.95rem; opacity: 0.9;">
+      <h3 style="margin: 16px 0 8px; color: #4cc9f0; font-size: 1.15rem;">🌀 Полный цикл чакр</h3>
+      <p style="font-size: 0.96rem; opacity: 0.9;">
         Включите в настройках режим «Полный цикл чакр» — звук мягко пройдёт от первой (Муладхара) до девятой (Единство) чакры и обратно.
       </p>
-      <p style="font-size: 0.95rem; opacity: 0.9; margin-bottom: 12px;">
+      <p style="font-size: 0.96rem; opacity: 0.9; margin-bottom: 12px;">
         Такая практика помогает гармонизировать энергетические центры тела, углубляя медитацию и ощущение целостности.
       </p>
 
@@ -343,13 +390,13 @@
         background: rgba(255, 255, 255, 0.08);
         border-left: 3px solid #f72585;
         padding: 10px;
-        font-size: 0.85rem;
-        opacity: 0.85;
+        font-size: 0.86rem;
+        opacity: 0.86;
       ">
         ⚠️ <strong>Важно:</strong> Чакральные частоты используются в рамках звуковой медитации и не являются медицинским или терапевтическим инструментом. Эффекты субъективны и не заменяют профессиональную медицинскую помощь. Практикуйте осознанно.
       </div>
 
-      <p style="margin-top: 12px; font-size: 0.9rem; opacity: 0.85;">
+      <p style="margin-top: 12px; font-size: 0.92rem; opacity: 0.86;">
         🎧 Для полного эффекта рекомендуется использовать наушники.
       </p>
     </div>
@@ -360,7 +407,7 @@
       <button class="modal-close" id="settings-close">✕</button>
       <h2>Настройки звука</h2>
 
-      <p style="font-size: 0.9rem; opacity: 0.85; margin-bottom: 12px;">
+      <p style="font-size: 0.92rem; opacity: 0.86; margin-bottom: 14px;">
         🎧 Для полного эффекта используйте наушники.
       </p>
 
@@ -376,7 +423,7 @@
         </label>
       </div>
 
-      <h3 style="margin: 20px 0 12px; color: #a9a9d6;">Частота фона:</h3>
+      <h3 style="margin: 22px 0 12px; color: #a9a9d6;">Частота фона:</h3>
       <div id="chakra-list"></div>
     </div>
   </div>
@@ -396,14 +443,14 @@
     let fullChakraCycle = false;
     let chakraCycleInterval = null;
 
-    const BG_VOLUME = 0.05; // 5% громкости (тише в наушниках)
+    const BG_VOLUME = 0.05; // 5% — тише в наушниках
     let hangVolumeLevel = 0.3;
 
     const sectors = [
-      document.getElementById('sector1'),
-      document.getElementById('sector2'),
-      document.getElementById('sector3'),
-      document.getElementById('sector4')
+      document.getElementById('segment1'),
+      document.getElementById('segment2'),
+      document.getElementById('segment3'),
+      document.getElementById('segment4')
     ];
 
     const hangNotes = [293.7, 349.2, 392.0, 466.2];
@@ -500,7 +547,6 @@
       oscillator.type = 'sine';
       oscillator.frequency.setValueAtTime(freq, now);
 
-      // Моно → стерео (одинаково в L и R)
       oscillator.connect(merger, 0, 0);
       oscillator.connect(merger, 0, 1);
       merger.connect(gainNode);
