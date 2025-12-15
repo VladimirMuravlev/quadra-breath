@@ -41,16 +41,18 @@
     .hidden {
       display: none !important;
     }
-    h1 {
-      font-size: 1.9rem;
+    h1, h2 {
+      text-align: center;
       margin-bottom: 22px;
       opacity: 0.92;
     }
+    h1 {
+      font-size: 1.9rem;
+    }
     h2 {
       font-size: 1.5rem;
-      margin: 24px 0 16px;
       color: #4cc9f0;
-      text-align: center;
+      margin: 24px 0 16px;
     }
 
     /* === Главная === */
@@ -85,50 +87,28 @@
     }
 
     /* === Навигация === */
-    .bottom-buttons {
-      display: flex;
-      gap: 30px;
-      margin-top: 20px;
-      justify-content: center;
-    }
-    .icon-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: rgba(22, 33, 62, 0.7);
-      border: 1px solid #4cc9f0;
-      color: #4cc9f0;
-      font-size: 1.4rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
-    }
-    .icon-btn:hover {
-      background: rgba(15, 23, 42, 0.9);
-    }
-    .bottom-label {
-      font-size: 0.86rem;
-      opacity: 0.82;
-      margin-top: 6px;
-    }
-    .back-btn, .marathon-btn {
+    .nav-buttons {
       position: absolute;
       top: 16px;
       left: 16px;
+      display: flex;
+      gap: 12px;
+      z-index: 10;
+    }
+    .nav-btn {
       background: rgba(22, 33, 62, 0.7);
       color: #d0d0f5;
       border: 1px solid #4cc9f0;
       border-radius: 20px;
-      padding: 6px 16px;
+      padding: 6px 14px;
       font-size: 0.95rem;
       cursor: pointer;
-      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .marathon-btn {
-      left: auto;
-      right: 16px;
+    .nav-btn:hover {
+      background: rgba(15, 23, 42, 0.9);
     }
 
     /* === Медитация === */
@@ -229,31 +209,46 @@
     }
 
     /* === Марафон === */
+    .marathon-description {
+      text-align: center;
+      font-size: 1.05rem;
+      opacity: 0.92;
+      margin: 16px 0 28px;
+      line-height: 1.5;
+      max-width: 420px;
+    }
+
     .marathon-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 12px;
+      gap: 14px;
       width: 100%;
-      max-width: 400px;
-      margin-top: 12px;
+      max-width: 360px;
+      margin: 0 auto;
     }
+
     .marathon-day {
+      width: 100%;
       aspect-ratio: 1;
-      border-radius: 12px;
-      background: rgba(22, 33, 62, 0.4);
+      border-radius: 50%;
+      background: rgba(22, 33, 62, 0.5);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.85rem;
       color: #a9a9d6;
-      transition: background 0.3s;
+      transition: all 0.3s ease;
+      border: 2px solid rgba(76, 201, 240, 0.2);
     }
     .marathon-day.completed {
       background: linear-gradient(135deg, #4361ee, #4cc9f0);
       color: white;
-      font-size: 1.4rem;
+      font-size: 1.6rem;
+      border-color: transparent;
+      box-shadow: 0 0 12px rgba(76, 201, 240, 0.4);
     }
 
+    /* === Модальные окна === */
     .modal {
       position: fixed;
       top: 0;
@@ -406,6 +401,35 @@
     #message.show {
       opacity: 1;
     }
+
+    .bottom-buttons {
+      display: flex;
+      gap: 30px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(22, 33, 62, 0.7);
+      border: 1px solid #4cc9f0;
+      color: #4cc9f0;
+      font-size: 1.4rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .icon-btn:hover {
+      background: rgba(15, 23, 42, 0.9);
+    }
+    .bottom-label {
+      font-size: 0.86rem;
+      opacity: 0.82;
+      margin-top: 6px;
+    }
   </style>
 </head>
 <body>
@@ -425,7 +449,7 @@
       <span class="bottom-label">Инструкция</span>
     </div>
     <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
-      <button id="settings-btn" class="icon-btn" aria-label="Настройки">⚙️</button>
+      <button id="settings-btn-main" class="icon-btn" aria-label="Настройки">⚙️</button>
       <span class="bottom-label">Настройки</span>
     </div>
   </div>
@@ -433,8 +457,10 @@
 
 <!-- Медитация -->
 <div id="meditation-screen" class="screen hidden">
-  <button id="back-to-main" class="back-btn">← На главную</button>
-  <button id="go-marathon-from-meditation" class="marathon-btn">Марафон</button>
+  <div class="nav-buttons">
+    <button id="back-to-main" class="nav-btn">← Главная</button>
+    <button id="settings-btn" class="nav-btn">⚙️ Настройки</button>
+  </div>
   
   <div id="app">
     <h1>Дыхательная практика спокойствия</h1>
@@ -469,11 +495,16 @@
 
 <!-- Марафон -->
 <div id="marathon-screen" class="screen hidden">
-  <button id="back-to-main-marathon" class="back-btn">← На главную</button>
+  <button id="back-to-main-marathon" class="nav-btn">← На главную</button>
+  
   <h2>Марафон «7 дней спокойствия»</h2>
-  <p style="opacity: 0.85; margin: 12px 0 20px; text-align: center;">
-    Завершите медитацию каждый день — и распустится цветок 🌸
+  
+  <p class="marathon-description">
+    Каждый день — шаг к внутренней тишине.<br>
+    Завершите медитацию хотя бы раз в день,<br>
+    и вы увидите, как распускается ваш цветок 🌸
   </p>
+
   <div id="marathon-grid" class="marathon-grid"></div>
 </div>
 
@@ -553,8 +584,20 @@
   document.getElementById('go-meditation').addEventListener('click', () => showScreen('meditation-screen'));
   document.getElementById('go-marathon').addEventListener('click', () => showScreen('marathon-screen'));
   document.getElementById('back-to-main').addEventListener('click', () => showScreen('main-screen'));
-  document.getElementById('go-marathon-from-meditation').addEventListener('click', () => showScreen('marathon-screen'));
   document.getElementById('back-to-main-marathon').addEventListener('click', () => showScreen('main-screen'));
+  document.getElementById('settings-btn').addEventListener('click', () => document.getElementById('settings-modal').classList.add('show'));
+
+  // Кнопки настройки внизу главной
+  document.getElementById('settings-btn-main').addEventListener('click', () => document.getElementById('settings-modal').classList.add('show'));
+
+  // Закрытие модалок
+  document.getElementById('help-close').addEventListener('click', () => document.getElementById('help-modal').classList.remove('show'));
+  document.getElementById('settings-close').addEventListener('click', () => document.getElementById('settings-modal').classList.remove('show'));
+
+  window.addEventListener('click', (e) => {
+    if (e.target === document.getElementById('help-modal')) document.getElementById('help-modal').classList.remove('show');
+    if (e.target === document.getElementById('settings-modal')) document.getElementById('settings-modal').classList.remove('show');
+  });
 
   window.addEventListener('popstate', () => {
     const hash = location.hash.replace('#', '');
@@ -585,9 +628,9 @@
       dayEl.className = 'marathon-day';
       if (progress[i]) {
         dayEl.classList.add('completed');
-        dayEl.innerHTML = '🌸';
+        dayEl.textContent = '🌸';
       } else {
-        dayEl.textContent = `День ${i}`;
+        dayEl.textContent = i;
       }
       grid.appendChild(dayEl);
     }
@@ -647,7 +690,7 @@
   ];
 
   const chakraShortDescriptions = {
-    174: "Естественное обезболивающее средство. Даёт орга-нам чувство безопасности и любви.",
+    174: "Естественное обезболивающее средство. Даёт органам чувство безопасности и любви.",
     285: "Помогает восстанавливать ткани и возвращать их к первоначальному виду.",
     396: "Освобождает от чувства вины и страха, позволяя начать заново.",
     417: "Отменяет прошлые травмы и способствует внутренним изменениям.",
@@ -841,7 +884,6 @@
     stopBackgroundTone();
     stopChakraCycle();
     
-    // Отмечаем день в марафоне
     if (location.hash === '#meditation') {
       markDayCompleted();
     }
@@ -927,18 +969,25 @@
     modal.classList.add('show');
     document.body.style.overflow = 'hidden';
   }
-  function closeModal(modal) {
-    modal.classList.remove('show');
-    document.body.style.overflow = '';
-  }
 
   document.getElementById('help-btn').addEventListener('click', () => openModal(helpModal));
-  document.getElementById('help-close').addEventListener('click', () => closeModal(helpModal));
-  helpModal.addEventListener('click', (e) => { if (e.target === helpModal) closeModal(helpModal); });
 
-  document.getElementById('settings-btn').addEventListener('click', () => openModal(settingsModal));
-  document.getElementById('settings-close').addEventListener('click', () => closeModal(settingsModal));
-  settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) closeModal(settingsModal); });
+  function showMessage(text) {
+    const el = document.getElementById('message');
+    el.textContent = text;
+    el.classList.add('show');
+  }
+
+  function resetToStart() {
+    stopSession();
+    document.getElementById('timer').textContent = '00:00';
+    document.getElementById('message').classList.remove('show');
+    durationControls.classList.remove('hidden');
+    playBtn.classList.add('hidden');
+    sessionControls.classList.add('hidden');
+    document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
+    selectedDuration = null;
+  }
 
   const durationControls = document.getElementById('duration-controls');
   const playBtn = document.getElementById('play-btn');
@@ -959,23 +1008,6 @@
     const secs = Math.floor((remaining % 60000) / 1000);
     document.getElementById('timer').textContent = 
       `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  }
-
-  function showMessage(text) {
-    const el = document.getElementById('message');
-    el.textContent = text;
-    el.classList.add('show');
-  }
-
-  function resetToStart() {
-    stopSession();
-    document.getElementById('timer').textContent = '00:00';
-    document.getElementById('message').classList.remove('show');
-    durationControls.classList.remove('hidden');
-    playBtn.classList.add('hidden');
-    sessionControls.classList.add('hidden');
-    document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
-    selectedDuration = null;
   }
 
   document.querySelectorAll('#duration-controls button').forEach(btn => {
@@ -1016,8 +1048,9 @@
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      if (helpModal.classList.contains('show')) closeModal(helpModal);
-      if (settingsModal.classList.contains('show')) closeModal(settingsModal);
+      if (helpModal.classList.contains('show')) helpModal.classList.remove('show');
+      if (settingsModal.classList.contains('show')) settingsModal.classList.remove('show');
+      document.body.style.overflow = '';
     }
   });
 
