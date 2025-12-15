@@ -186,9 +186,9 @@
       border: 1px solid #4cc9f0;
       border-radius: 18px;
       padding: 26px;
-      max-width: 90%;
-      width: 340px;
-      max-height: 80vh;
+      max-width: 94%;
+      width: 380px;
+      max-height: 85vh;
       overflow-y: auto;
       color: #d0d0f5;
     }
@@ -238,50 +238,44 @@
     }
 
     #chakra-list {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      display: flex;
+      flex-direction: column;
       gap: 14px;
-      margin-top: 12px;
+      margin-top: 10px;
+      max-height: 340px;
+      overflow-y: auto;
+      padding-right: 6px;
     }
     .chakra-item {
+      position: relative;
+      width: 100%;
+      height: 64px;
+      border-radius: 50%;
+      cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 10px;
-      border-radius: 12px;
-      background: rgba(22, 33, 62, 0.4);
-      cursor: pointer;
-      transition: background 0.2s;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+      transition: transform 0.2s, box-shadow 0.2s;
+      overflow: hidden;
     }
     .chakra-item:hover {
-      background: rgba(22, 33, 62, 0.7);
+      transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
     .chakra-item.active {
-      background: rgba(76, 201, 240, 0.2);
-      border: 1px solid #4cc9f0;
-    }
-    .chakra-color {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      flex-shrink: 0;
+      box-shadow: 0 0 0 3px #4cc9f0 inset;
     }
     .chakra-info {
-      text-align: left;
-      font-size: 0.98rem;
-    }
-    .chakra-name {
-      font-weight: 600;
+      text-align: center;
+      font-size: 0.92rem;
+      z-index: 2;
     }
     .chakra-hz {
-      font-size: 0.85rem;
-      opacity: 0.8;
-    }
-    .chakra-desc {
-      font-size: 0.78rem;
-      opacity: 0.78;
-      margin-top: 5px;
-      line-height: 1.3;
+      font-size: 0.76rem;
+      opacity: 0.9;
     }
 
     #chakra-mode {
@@ -377,7 +371,7 @@
 
       <h3 style="margin: 16px 0 8px; color: #4cc9f0; font-size: 1.15rem;">🌀 Полный цикл чакр</h3>
       <p style="font-size: 0.96rem; opacity: 0.9;">
-        Включите в настройках режим «Полный цикл чакр» — звук мягко пройдёт от первой (Муладхара) до девятой (Единство) чакры и обратно.
+        Включите режим «Полный цикл чакр» — звук мягко пройдёт от Муладхары до Единства и обратно.
       </p>
       <p style="font-size: 0.96rem; opacity: 0.9; margin-bottom: 12px;">
         Такая практика помогает гармонизировать энергетические центры тела, углубляя медитацию и ощущение целостности.
@@ -405,7 +399,7 @@
       <h2>Настройки звука</h2>
 
       <p style="font-size: 0.92rem; opacity: 0.86; margin-bottom: 14px;">
-        🎧 Для полного эффекта используйте наушники.
+        🎧 Используйте наушники для полного эффекта.
       </p>
 
       <div class="volume-control">
@@ -416,11 +410,11 @@
       <div id="chakra-mode">
         <label>
           <input type="checkbox" id="full-chakra-cycle">
-          Полный цикл чакр (вверх и вниз)
+          Полный цикл чакр (вверх → вниз)
         </label>
       </div>
 
-      <h3 style="margin: 22px 0 12px; color: #a9a9d6;">Частота фона:</h3>
+      <h3 style="margin: 22px 0 14px; color: #a9a9d6; font-size: 1.1rem;">Частоты чакр:</h3>
       <div id="chakra-list"></div>
     </div>
   </div>
@@ -454,7 +448,7 @@
     const hangNotes = [293.7, 349.2, 392.0, 466.2];
 
     const chakras = [
-      { name: "Нулевая", hz: 174, color: "#ff0000" },
+      { name: "Муладхара", hz: 174, color: "#ff0000" },
       { name: "Свадхистхана", hz: 285, color: "#ff8000" },
       { name: "Манипура", hz: 396, color: "#ffff00" },
       { name: "Анахата", hz: 417, color: "#00ff00" },
@@ -580,7 +574,7 @@
 
       sectors.forEach(s => {
         s.classList.remove('active');
-        s.style.background = ''; // ← возвращаем CSS-градиент
+        s.style.background = '';
       });
 
       const currentSector = sectors[currentPhaseIndex];
@@ -599,7 +593,7 @@
       stopSession();
       sectors.forEach(s => {
         s.classList.remove('active');
-        s.style.background = ''; // ← CSS остаётся
+        s.style.background = '';
       });
       document.getElementById('message').classList.remove('show');
 
@@ -696,24 +690,19 @@
       if (chakra.hz === currentFrequency) item.classList.add('active');
       item.dataset.hz = chakra.hz;
       
-      const colorDiv = document.createElement('div');
-      colorDiv.className = 'chakra-color';
       if (chakra.color.includes('gradient')) {
-        colorDiv.style.background = chakra.color;
+        item.style.background = chakra.color;
       } else {
-        colorDiv.style.backgroundColor = chakra.color;
+        item.style.backgroundColor = chakra.color;
       }
       
-      const infoDiv = document.createElement('div');
-      infoDiv.className = 'chakra-info';
-      infoDiv.innerHTML = `
-        <div class="chakra-name">${chakra.name}</div>
-        <div class="chakra-hz">${chakra.hz} Гц</div>
-        <div class="chakra-desc">${chakraDescriptions[chakra.hz]}</div>
+      item.innerHTML = `
+        <div class="chakra-info">
+          <div class="chakra-name">${chakra.name}</div>
+          <div class="chakra-hz">${chakra.hz} Гц</div>
+        </div>
       `;
-      
-      item.appendChild(colorDiv);
-      item.appendChild(infoDiv);
+
       chakraList.appendChild(item);
 
       item.addEventListener('click', () => {
