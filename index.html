@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -241,10 +242,9 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
-      margin-top: 10px;
-      max-height: 340px;
-      overflow-y: auto;
-      padding-right: 6px;
+      margin-top: 12px;
+      max-height: 420px;
+      overflow: hidden;
     }
     .chakra-item {
       position: relative;
@@ -273,9 +273,17 @@
       font-size: 0.92rem;
       z-index: 2;
     }
+    .chakra-name {
+      font-size: 0.95rem;
+      line-height: 1.2;
+    }
     .chakra-hz {
       font-size: 0.76rem;
       opacity: 0.9;
+    }
+    .chakra-desc {
+      font-size: 0.72rem;
+      opacity: 0.85;
     }
 
     #chakra-mode {
@@ -456,19 +464,19 @@
       { name: "Аджна", hz: 639, color: "#0000ff" },
       { name: "Сахасрара", hz: 741, color: "#8000ff" },
       { name: "Космос", hz: 852, color: "#00ffff" },
-      { name: "Единство", hz: 963, color: "linear-gradient(45deg, #ffd700, #ffed00)" }
+      { name: "Единство", hz: 963, color: "#ffd700" }
     ];
 
-    const chakraDescriptions = {
-      174: "Естественное обезболивающее средство. Даёт органам чувство безопасности и любви.",
-      285: "Помогает восстанавливать ткани и возвращать их к первоначальному виду.",
-      396: "Освобождает от чувства вины и страха, позволяя начать заново.",
-      417: "Отменяет прошлые травмы и способствует внутренним изменениям.",
-      528: "Частота чуда. Способствует трансформации, ясности ума и восстановлению.",
-      639: "Гармонизирует отношения и раскрывает сердечный центр.",
-      741: "Решает проблемы, очищает от токсинов и расширяет сознание.",
-      852: "Пробуждает интуицию и возвращает к духовному порядку.",
-      963: "Связывает с потоком Света и ощущением единства со Всем."
+    const chakraShortDescriptions = {
+      174: "Безопасность",
+      285: "Восстановление",
+      396: "Освобождение",
+      417: "Изменения",
+      528: "Трансформация",
+      639: "Отношения",
+      741: "Решения",
+      852: "Интуиция",
+      963: "Целостность"
     };
 
     let currentBackgroundOscillator = null;
@@ -689,17 +697,13 @@
       item.className = 'chakra-item';
       if (chakra.hz === currentFrequency) item.classList.add('active');
       item.dataset.hz = chakra.hz;
-      
-      if (chakra.color.includes('gradient')) {
-        item.style.background = chakra.color;
-      } else {
-        item.style.backgroundColor = chakra.color;
-      }
+      item.style.backgroundColor = chakra.color;
       
       item.innerHTML = `
         <div class="chakra-info">
           <div class="chakra-name">${chakra.name}</div>
           <div class="chakra-hz">${chakra.hz} Гц</div>
+          <div class="chakra-desc">${chakraShortDescriptions[chakra.hz]}</div>
         </div>
       `;
 
