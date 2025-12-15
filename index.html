@@ -184,10 +184,10 @@
       background: #16213e;
       border: 1px solid #4cc9f0;
       border-radius: 18px;
-      padding: 26px;
+      padding: 24px 24px 40px; /* padding-bottom увеличен */
       max-width: 94%;
       width: 380px;
-      max-height: 85vh;
+      max-height: 82vh;
       overflow-y: auto;
       color: #d0d0f5;
     }
@@ -239,10 +239,11 @@
     #chakra-list {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
       margin-top: 16px;
-      max-height: 460px;
-      overflow: hidden;
+      max-height: calc(82vh - 240px); /* адаптивная высота */
+      overflow-y: auto;
+      padding-right: 6px;
     }
     .chakra-row {
       display: flex;
@@ -252,36 +253,36 @@
     .chakra-text {
       flex: 1;
       color: #d0d0f5;
-      font-size: 0.95rem;
+      font-size: 0.85rem;
     }
     .chakra-name {
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       line-height: 1.2;
     }
     .chakra-hz {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       opacity: 0.9;
       margin-top: 2px;
     }
     .chakra-desc {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       opacity: 0.85;
       margin-top: 3px;
-      line-height: 1.3;
+      line-height: 1.2;
     }
     .chakra-circle {
-      width: 33px;
-      height: 33px;
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
       cursor: pointer;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
       transition: transform 0.2s, box-shadow 0.2s;
       flex-shrink: 0;
     }
     .chakra-circle:hover {
       transform: scale(1.04);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     }
     .chakra-circle.active {
       outline: 3px solid #4cc9f0;
@@ -471,7 +472,7 @@
     ];
 
     const chakraShortDescriptions = {
-      174: "Естественное обезболивающее средство. Даёт органам чувство безопасности и любви.",
+      174: "Естественное обезболивающее средство. Даёт орга-нам чувство безопасности и любви.",
       285: "Помогает восстанавливать ткани и возвращать их к первоначальному виду.",
       396: "Освобождает от чувства вины и страха, позволяя начать заново.",
       417: "Отменяет прошлые травмы и способствует внутренним изменениям.",
