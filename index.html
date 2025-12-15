@@ -57,22 +57,15 @@
       width: 50%;
       height: 50%;
       transform-origin: 100% 100%;
-      background: rgba(22, 33, 62, 0.3);
       clip-path: polygon(0 0, 100% 0, 100% 100%);
       border-radius: 0 0 0 200px;
-      transition: 
-        background-color 0.5s ease,
-        opacity 0.5s ease,
-        transform 0.5s ease;
+      background: rgba(22, 33, 62, 0.3);
+      opacity: 0.3;
+      transition: opacity 0.3s ease;
     }
     .segment.active {
       opacity: 1;
-      transform: scale(1.02);
     }
-    #segment1 { transform: rotate(0deg); background: linear-gradient(135deg, #4cc9f0, #4361ee); }
-    #segment2 { transform: rotate(90deg); background: linear-gradient(135deg, #a9a9d6, #7209b7); }
-    #segment3 { transform: rotate(180deg); background: linear-gradient(135deg, #f72585, #b5179e); }
-    #segment4 { transform: rotate(270deg); background: linear-gradient(135deg, #a9a9d6, #7209b7); }
 
     .center-dot {
       position: absolute;
@@ -468,15 +461,15 @@
     ];
 
     const chakraDescriptions = {
-      174: "Способствует ощущению безопасности и заземления. Частота умиротворения.",
-      285: "Поддерживает творческое восстановление и гармонизацию внутреннего пространства.",
-      396: "Освобождает от чувства вины и страха, помогает начать заново.",
-      417: "Способствует внутренним переменам и освобождению от прошлого опыта.",
-      528: "Связана с трансформацией, ясностью ума и пробуждением внутреннего потенциала.",
-      639: "Поддерживает гармонию в отношениях и раскрытие сердечного центра.",
-      741: "Способствует решению жизненных задач и расширению сознания.",
-      852: "Направляет внимание внутрь, пробуждая интуицию и внутренний покой.",
-      963: "Способствует ощущению целостности и единства с более широким целым."
+      174: "Естественное обезболивающее средство. Даёт органам чувство безопасности и любви.",
+      285: "Помогает восстанавливать ткани и возвращать их к первоначальному виду.",
+      396: "Освобождает от чувства вины и страха, позволяя начать заново.",
+      417: "Отменяет прошлые травмы и способствует внутренним изменениям.",
+      528: "Частота чуда. Способствует трансформации, ясности ума и восстановлению.",
+      639: "Гармонизирует отношения и раскрывает сердечный центр.",
+      741: "Решает проблемы, очищает от токсинов и расширяет сознание.",
+      852: "Пробуждает интуицию и возвращает к духовному порядку.",
+      963: "Связывает с потоком Света и ощущением единства со Всем."
     };
 
     let currentBackgroundOscillator = null;
@@ -576,9 +569,31 @@
     function highlightSector(index) {
       sectors.forEach((s, i) => {
         if (i === index) {
-          setTimeout(() => s.classList.add('active'), 50);
+          s.classList.remove('active');
+          void s.offsetWidth;
+          s.classList.add('active');
+
+          let startTime = null;
+          const animateGradient = (timestamp) => {
+            if (!startTime) startTime = timestamp;
+            const elapsed = timestamp - startTime;
+            const progress = Math.min(elapsed / 4000, 1);
+
+            const baseHue = 200 + 240 * (index / 4); // уникальный стартовый оттенок на сектор
+            const hue = baseHue + 30 * Math.sin(progress * Math.PI);
+            const lightness = 45 + 25 * Math.sin(progress * Math.PI);
+            const saturation = 80 + 20 * Math.sin(progress * Math.PI);
+
+            s.style.background = `linear-gradient(135deg, hsl(${hue}, ${saturation}%, ${lightness}%), hsl(${hue - 30}, ${saturation}%, ${lightness - 10}%))`;
+
+            if (progress < 1) {
+              requestAnimationFrame(animateGradient);
+            }
+          };
+          requestAnimationFrame(animateGradient);
         } else {
           s.classList.remove('active');
+          s.style.background = 'rgba(22, 33, 62, 0.3)';
         }
       });
     }
