@@ -245,53 +245,86 @@
       overflow: hidden;
     }
     .chakra-item {
-      width: 80%;
-      height: 64px;
-      border-radius: 50%;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      transition: transform 0.2s, box-shadow 0.2s;
-      margin: 0 auto;
-    }
-    .chakra-item:hover {
-      transform: scale(1.03);
-      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
-    }
-    .chakra-item.active {
-      box-shadow: 0 0 0 3px #4cc9f0;
-    }
-    .chakra-content {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      text-align: center;
-      padding: 8px;
-      font-weight: 600;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-    }
-    .chakra-name {
-      font-size: 0.95rem;
-      line-height: 1.2;
-    }
-    .chakra-hz {
-      font-size: 0.75rem;
-      opacity: 0.9;
-      margin-top: 2px;
-    }
-    .chakra-desc {
-      font-size: 0.7rem;
-      opacity: 0.85;
-      margin-top: 4px;
-    }
+  /* Размер: нечётное число для лучшего сглаживания */
+  width: 65px;
+  height: 65px;
+  
+  /* Идеальный круг */
+  border-radius: 50%;
+  
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  
+  /* Оптимизированная тень (меньше размытия) */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  
+  /* Плавные переходы */
+  transition: transform 0.2s, box-shadow 0.2s;
+  
+  /* Сглаживание краёв на уровне GPU */
+  filter: blur(0.1px);
+  backface-visibility: hidden;
+  transform: translateZ(0); /* Активирует аппаратное ускорение */
+}
+
+.chakra-item:hover {
+  transform: scale(1.04);
+  /* Умеренная тень при наведении */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.chakra-item.active {
+  /* Чёткая граница вместо размытой тени */
+  outline: 3px solid #4cc9f0;
+  outline-offset: -3px; /* Контур внутри границ элемента */
+  box-shadow: none; /* Отключаем тень */
+}
+
+.chakra-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-align: center;
+  padding: 8px;
+  font-weight: 600;
+  /* Улучшенная тень для текста */
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.7);
+}
+
+.chakra-name {
+  font-size: 0.95rem;
+  line-height: 1.2;
+  /* Защита от обрезания текста */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chakra-hz {
+  font-size: 0.75rem;
+  opacity: 0.9;
+  margin-top: 2px;
+}
+
+.chakra-desc {
+  font-size: 0.7rem;
+  opacity: 0.85;
+  margin-top: 4px;
+  /* Многострочный текст с ограничением */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 
     #chakra-mode {
       margin: 18px 0;
