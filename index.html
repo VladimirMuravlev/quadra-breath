@@ -52,18 +52,21 @@
       overflow: hidden;
       box-shadow: 0 0 20px rgba(76, 201, 240, 0.15);
     }
-    .needle {
+    .segment {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 8px;
-      height: 110px;
-      background: linear-gradient(to bottom, #4cc9f0, #4361ee);
-      transform-origin: 50% 100%;
-      transform: rotate(0deg);
-      border-radius: 4px 4px 0 0;
-      box-shadow: 0 0 8px rgba(76, 201, 240, 0.6);
+      width: 50%;
+      height: 50%;
+      transform-origin: 100% 100%;
+      clip-path: polygon(0 0, 100% 0, 100% 100%);
+      border-radius: 0 0 0 200px;
+      background: rgba(22, 33, 62, 0.3);
+      opacity: 0.3;
+      transition: opacity 0.3s ease;
     }
+    .segment.active {
+      opacity: 1;
+    }
+
     .center-dot {
       position: absolute;
       top: 50%;
@@ -318,7 +321,10 @@
   <div id="app">
     <h1>Квадратное Дыхание</h1>
     <div id="breath-circle">
-      <div class="needle" id="needle"></div>
+      <div class="segment" id="segment1"></div>
+      <div class="segment" id="segment2"></div>
+      <div class="segment" id="segment3"></div>
+      <div class="segment" id="segment4"></div>
       <div class="center-dot"></div>
     </div>
     <div id="timer">00:00</div>
@@ -435,7 +441,12 @@
     const BG_VOLUME = 0.05;
     let hangVolumeLevel = 0.3;
 
-    const needle = document.getElementById('needle');
+    const sectors = [
+      document.getElementById('segment1'),
+      document.getElementById('segment2'),
+      document.getElementById('segment3'),
+      document.getElementById('segment4')
+    ];
 
     const hangNotes = [293.7, 349.2, 392.0, 466.2];
 
@@ -564,20 +575,29 @@
       const elapsed = now - phaseStartTime;
       const progress = (elapsed % phaseDuration) / phaseDuration;
 
-      const angle = currentPhaseIndex * 90 + 90 * progress;
-      needle.style.transform = `rotate(${angle}deg)`;
+      sectors.forEach(s => {
+        s.classList.remove('active');
+        s.style.background = 'rgba(22, 33, 62, 0.3)';
+      });
+
+      const currentSector = sectors[currentPhaseIndex];
+      currentSector.classList.add('active');
 
       const baseHue = 200 + 240 * (currentPhaseIndex / 4);
       const hue = baseHue + 30 * Math.sin(progress * Math.PI);
       const lightness = 45 + 25 * Math.sin(progress * Math.PI);
       const saturation = 80 + 20 * Math.sin(progress * Math.PI);
-      needle.style.background = `linear-gradient(to bottom, hsl(${hue}, ${saturation}%, ${lightness}%), hsl(${hue - 30}, ${saturation}%, ${lightness - 10}%))`;
+      currentSector.style.background = `linear-gradient(135deg, hsl(${hue}, ${saturation}%, ${lightness}%), hsl(${hue - 30}, ${saturation}%, ${lightness - 10}%))`;
 
       requestAnimationFrame(animateBreathCircle);
     }
 
     function startSession(durationMs) {
       stopSession();
+      sectors.forEach(s => {
+        s.classList.remove('active');
+        s.style.background = 'rgba(22, 33, 62, 0.3)';
+      });
       document.getElementById('message').classList.remove('show');
 
       totalMs = durationMs;
