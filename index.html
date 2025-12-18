@@ -252,56 +252,6 @@
       box-shadow: 0 0 10px rgba(76, 201, 240, 0.4);
     }
 
-    /* === Модальные окна === */
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(15, 15, 27, 0.9);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    .modal.show {
-      display: flex;
-      opacity: 1;
-    }
-    .modal-content {
-      background: #16213e;
-      border: 1px solid #4cc9f0;
-      border-radius: 20px;
-      padding: 28px;
-      max-width: 92%;
-      width: 360px;
-      max-height: 85vh;
-      overflow-y: auto;
-      color: #d0d0f5;
-      text-align: center;
-    }
-    .modal h2 {
-      font-size: 1.45rem;
-      margin-bottom: 20px;
-      color: #4cc9f0;
-    }
-    .modal-close {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: none;
-      border: none;
-      color: #a9a9d6;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-    .modal-close:hover {
-      color: #f72585;
-    }
-
     .volume-control {
       margin: 24px 0;
     }
@@ -395,6 +345,10 @@
     #message.show {
       opacity: 1;
     }
+
+    .back-btn {
+      margin-top: 24px;
+    }
   </style>
 </head>
 <body>
@@ -455,71 +409,70 @@
   </div>
 </div>
 
-<!-- Модальные окна -->
-<div id="help-modal" class="modal">
-  <div class="modal-content">
-    <button class="modal-close" id="help-close">✕</button>
-    <h2>Инструкция</h2>
-    
-    <p><strong>Квадратное дыхание (4–4–4–4):</strong></p>
-    <p>1. <strong>Вдох</strong> — 4 сек</p>
-    <p>2. <strong>Задержка</strong> — 4 сек</p>
-    <p>3. <strong>Выдох</strong> — 4 сек</p>
-    <p>4. <strong>Задержка</strong> — 4 сек</p>
+<!-- Инструкция -->
+<div id="help-screen" class="screen hidden">
+  <h2>Инструкция</h2>
+  
+  <p><strong>Квадратное дыхание (4–4–4–4):</strong></p>
+  <p>1. <strong>Вдох</strong> — 4 сек</p>
+  <p>2. <strong>Задержка</strong> — 4 сек</p>
+  <p>3. <strong>Выдох</strong> — 4 сек</p>
+  <p>4. <strong>Задержка</strong> — 4 сек</p>
 
-    <p style="margin: 16px 0; opacity: 0.9;">
-      Этот ритм успокаивает нервную систему и снижает тревожность.
-    </p>
+  <p style="margin: 16px 0; opacity: 0.9;">
+    Этот ритм успокаивает нервную систему и снижает тревожность.
+  </p>
 
-    <h3 style="margin: 20px 0 12px; color: #4cc9f0;">🌀 Марафон 7 дней</h3>
-    <p style="opacity: 0.9; margin-bottom: 16px;">
-      Марафон помогает выработать устойчивую привычку медитации.<br>
-      Каждый день вы завершаете одну сессию — и видите свой прогресс.<br>
-      Это укрепляет мотивацию и углубляет эффект практики.
-    </p>
+  <h3 style="margin: 20px 0 12px; color: #4cc9f0;">🌀 Марафон 7 дней</h3>
+  <p style="opacity: 0.9; margin-bottom: 16px;">
+    Марафон помогает выработать устойчивую привычку медитации.<br>
+    Каждый день вы завершаете одну сессию — и видите свой прогресс.<br>
+    Это укрепляет мотивацию и углубляет эффект практики.
+  </p>
 
-    <h3 style="margin: 20px 0 12px; color: #4cc9f0;">🎵 Чакральные частоты</h3>
-    <p style="opacity: 0.9; margin-bottom: 16px;">
-      На основе исследований:<br>
-      <strong>174 Гц</strong> — безопасность, <strong>285 Гц</strong> — восстановление,<br>
-      <strong>396 Гц</strong> — освобождение, <strong>528 Гц</strong> — трансформация,<br>
-      <strong>963 Гц</strong> — ощущение единства.
-    </p>
+  <h3 style="margin: 20px 0 12px; color: #4cc9f0;">🎵 Чакральные частоты</h3>
+  <p style="opacity: 0.9; margin-bottom: 16px;">
+    На основе исследований:<br>
+    <strong>174 Гц</strong> — безопасность, <strong>285 Гц</strong> — восстановление,<br>
+    <strong>396 Гц</strong> — освобождение, <strong>528 Гц</strong> — трансформация,<br>
+    <strong>963 Гц</strong> — ощущение единства.
+  </p>
 
-    <div style="background: rgba(255,255,255,0.08); border-left: 3px solid #f72585; padding: 11px; font-size: 0.85rem; opacity: 0.85; margin-top: 16px;">
-      ⚠️ Чакральные частоты используются в рамках звуковой медитации и не являются медицинским инструментом.
-    </div>
-
-    <p style="margin-top: 16px; opacity: 0.85;">
-      🎧 Используйте наушники для полного эффекта.
-    </p>
+  <div style="background: rgba(255,255,255,0.08); border-left: 3px solid #f72585; padding: 11px; font-size: 0.85rem; opacity: 0.85; margin: 16px 0;">
+    ⚠️ Чакральные частоты используются в рамках звуковой медитации и не являются медицинским инструментом.
   </div>
+
+  <p style="margin-top: 16px; opacity: 0.85;">
+    🎧 Используйте наушники для полного эффекта.
+  </p>
+
+  <button id="back-to-main-from-help" class="main-btn secondary back-btn">← На главную</button>
 </div>
 
-<div id="settings-modal" class="modal">
-  <div class="modal-content">
-    <button class="modal-close" id="settings-close">✕</button>
-    <h2>Настройки звука</h2>
+<!-- Настройки -->
+<div id="settings-screen" class="screen hidden">
+  <h2>Настройки звука</h2>
 
-    <p style="opacity: 0.86; margin-bottom: 16px;">
-      🎧 Используйте наушники для полного эффекта.
-    </p>
+  <p style="opacity: 0.86; margin: 16px 0;">
+    🎧 Используйте наушники для полного эффекта.
+  </p>
 
-    <div class="volume-control">
-      <label for="breath-volume">Громкость звука сегментов</label>
-      <input type="range" id="breath-volume" min="0" max="50" value="30">
-    </div>
-
-    <div id="chakra-mode">
-      <label>
-        <input type="checkbox" id="full-chakra-cycle">
-        Полный цикл чакр (вверх → вниз)
-      </label>
-    </div>
-
-    <h3 style="margin: 22px 0 14px; color: #a9a9d6;">Частоты чакр:</h3>
-    <div id="chakra-list"></div>
+  <div class="volume-control">
+    <label for="breath-volume">Громкость звука сегментов</label>
+    <input type="range" id="breath-volume" min="0" max="50" value="30">
   </div>
+
+  <div id="chakra-mode">
+    <label>
+      <input type="checkbox" id="full-chakra-cycle">
+      Полный цикл чакр (вверх → вниз)
+    </label>
+  </div>
+
+  <h3 style="margin: 22px 0 14px; color: #a9a9d6;">Частоты чакр:</h3>
+  <div id="chakra-list"></div>
+
+  <button id="back-to-main-from-settings" class="main-btn secondary back-btn">← На главную</button>
 </div>
 
 <!-- Глобальная навигация — только иконки -->
@@ -541,34 +494,30 @@
     if (screenId === 'main-screen') document.getElementById('nav-main').classList.add('active');
     else if (screenId === 'meditation-screen') document.getElementById('nav-meditation').classList.add('active');
     else if (screenId === 'marathon-screen') document.getElementById('nav-marathon').classList.add('active');
+    else if (screenId === 'help-screen') document.getElementById('nav-help').classList.add('active');
+    else if (screenId === 'settings-screen') document.getElementById('nav-settings').classList.add('active');
     
     history.pushState(null, '', `#${screenId.replace('-screen', '')}`);
   }
 
+  // Навигация
   document.getElementById('nav-main').addEventListener('click', () => showScreen('main-screen'));
   document.getElementById('nav-meditation').addEventListener('click', () => showScreen('meditation-screen'));
   document.getElementById('nav-marathon').addEventListener('click', () => showScreen('marathon-screen'));
-  document.getElementById('nav-help').addEventListener('click', () => document.getElementById('help-modal').classList.add('show'));
-  document.getElementById('nav-settings').addEventListener('click', () => document.getElementById('settings-modal').classList.add('show'));
+  document.getElementById('nav-help').addEventListener('click', () => showScreen('help-screen'));
+  document.getElementById('nav-settings').addEventListener('click', () => showScreen('settings-screen'));
 
   document.getElementById('go-meditation-home').addEventListener('click', () => showScreen('meditation-screen'));
   document.getElementById('go-marathon-home').addEventListener('click', () => showScreen('marathon-screen'));
-
-  // Закрытие модалок
-  document.getElementById('help-close').addEventListener('click', () => document.getElementById('help-modal').classList.remove('show'));
-  document.getElementById('settings-close').addEventListener('click', () => document.getElementById('settings-modal').classList.remove('show'));
-
-  document.getElementById('help-modal').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('help-modal')) document.getElementById('help-modal').classList.remove('show');
-  });
-  document.getElementById('settings-modal').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('settings-modal')) document.getElementById('settings-modal').classList.remove('show');
-  });
+  document.getElementById('back-to-main-from-help').addEventListener('click', () => showScreen('main-screen'));
+  document.getElementById('back-to-main-from-settings').addEventListener('click', () => showScreen('main-screen'));
 
   window.addEventListener('popstate', () => {
     const hash = location.hash.replace('#', '');
     if (hash === 'meditation') showScreen('meditation-screen');
     else if (hash === 'marathon') showScreen('marathon-screen');
+    else if (hash === 'help') showScreen('help-screen');
+    else if (hash === 'settings') showScreen('settings-screen');
     else showScreen('main-screen');
   });
 
@@ -639,42 +588,38 @@
     const modal = document.createElement('div');
     modal.id = 'session-complete-modal';
     modal.className = 'modal show';
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 15, 27, 0.9); display: flex; align-items: center;
+      justify-content: center; z-index: 1000;
+    `;
     if (inMarathon) {
       modal.innerHTML = `
-        <div class="modal-content">
-          <h2>🌸 Отлично!</h2>
-          <p style="margin: 16px 0; opacity: 0.9;">
-            Вы завершили дневную практику.<br>
-            Ваш цветок расцвёл!
-          </p>
-          <button id="go-to-marathon" class="main-btn secondary" style="margin-top: 20px; padding: 10px 24px;">
-            К марафону
-          </button>
+        <div style="background: #16213e; border: 1px solid #4cc9f0; border-radius: 20px; padding: 28px; max-width: 92%; width: 360px; color: #d0d0f5; text-align: center;">
+          <h2 style="font-size: 1.45rem; margin-bottom: 20px; color: #4cc9f0;">🌸 Отлично!</h2>
+          <p style="margin: 16px 0; opacity: 0.9;">Вы завершили дневную практику.<br>Ваш цветок расцвёл!</p>
+          <button id="go-to-marathon" style="width: 100%; max-width: 320px; padding: 12px; font-size: 1.1rem; border: none; border-radius: 24px; background: rgba(22, 33, 62, 0.7); color: #d0d0f5; border: 1px solid #4cc9f0; margin-top: 20px;">К марафону</button>
         </div>
       `;
+      document.body.appendChild(modal);
       document.getElementById('go-to-marathon').addEventListener('click', () => {
         modal.remove();
         showScreen('marathon-screen');
       });
     } else {
       modal.innerHTML = `
-        <div class="modal-content">
-          <h2>🙏 Спасибо!</h2>
-          <p style="margin: 16px 0; opacity: 0.9;">
-            Вы отлично справились!<br>
-            Хотите пройти 7-дневный марафон?
-          </p>
-          <button id="go-to-marathon-offer" class="main-btn primary" style="margin-top: 20px; padding: 10px 24px;">
-            Перейти к марафону
-          </button>
+        <div style="background: #16213e; border: 1px solid #4cc9f0; border-radius: 20px; padding: 28px; max-width: 92%; width: 360px; color: #d0d0f5; text-align: center;">
+          <h2 style="font-size: 1.45rem; margin-bottom: 20px; color: #4cc9f0;">🙏 Спасибо!</h2>
+          <p style="margin: 16px 0; opacity: 0.9;">Вы отлично справились!<br>Хотите пройти 7-дневный марафон?</p>
+          <button id="go-to-marathon-offer" style="width: 100%; max-width: 320px; padding: 12px; font-size: 1.1rem; border: none; border-radius: 24px; background: linear-gradient(120deg, #4361ee, #4cc9f0); color: white; margin-top: 20px;">Перейти к марафону</button>
         </div>
       `;
+      document.body.appendChild(modal);
       document.getElementById('go-to-marathon-offer').addEventListener('click', () => {
         modal.remove();
         showScreen('marathon-screen');
       });
     }
-    document.body.appendChild(modal);
     modal.addEventListener('click', (e) => {
       if (e.target === modal) modal.remove();
     });
@@ -684,16 +629,16 @@
     const modal = document.createElement('div');
     modal.id = 'completion-modal';
     modal.className = 'modal show';
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 15, 27, 0.9); display: flex; align-items: center;
+      justify-content: center; z-index: 1000;
+    `;
     modal.innerHTML = `
-      <div class="modal-content">
-        <h2>🌸 Поздравляем!</h2>
-        <p style="margin: 16px 0; opacity: 0.9;">
-          Вы прошли 7 дней практики!<br>
-          Ваше спокойствие — ваша сила.
-        </p>
-        <button id="restart-marathon" class="main-btn primary" style="margin-top: 20px; padding: 12px 28px;">
-          Начать сначала
-        </button>
+      <div style="background: #16213e; border: 1px solid #4cc9f0; border-radius: 20px; padding: 28px; max-width: 92%; width: 360px; color: #d0d0f5; text-align: center;">
+        <h2 style="font-size: 1.45rem; margin-bottom: 20px; color: #4cc9f0;">🌸 Поздравляем!</h2>
+        <p style="margin: 16px 0; opacity: 0.9;">Вы прошли 7 дней практики!<br>Ваше спокойствие — ваша сила.</p>
+        <button id="restart-marathon" style="width: 100%; max-width: 320px; padding: 12px; font-size: 1.1rem; border: none; border-radius: 24px; background: linear-gradient(120deg, #4361ee, #4cc9f0); color: white; margin-top: 20px;">Начать сначала</button>
       </div>
     `;
     document.body.appendChild(modal);
@@ -713,16 +658,12 @@
   function renderMarathonGrid() {
     const grid = document.getElementById('marathon-grid');
     grid.innerHTML = '';
-    
-    // Всегда создаём 7 дней
     for (let i = 1; i <= 7; i++) {
       const dayEl = document.createElement('div');
       dayEl.className = 'marathon-day';
       dayEl.textContent = i;
       grid.appendChild(dayEl);
     }
-    
-    // Накладываем прогресс, если есть
     const progress = getMarathonProgress();
     if (progress.active) {
       for (let i = 1; i <= 7; i++) {
@@ -737,7 +678,7 @@
 
   document.getElementById('start-marathon-btn').addEventListener('click', startMarathon);
 
-  // === МЕДИТАЦИЯ (сокращённо) ===
+  // === МЕДИТАЦИЯ ===
   const phaseDuration = 4000;
   let totalMs = null;
   let endTime = null;
@@ -1000,8 +941,6 @@
     }
   }
 
-  const helpModal = document.getElementById('help-modal');
-  const settingsModal = document.getElementById('settings-modal');
   const chakraList = document.getElementById('chakra-list');
   const breathVolumeSlider = document.getElementById('breath-volume');
   const fullChakraCheckbox = document.getElementById('full-chakra-cycle');
@@ -1129,8 +1068,7 @@
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      if (helpModal.classList.contains('show')) helpModal.classList.remove('show');
-      if (settingsModal.classList.contains('show')) settingsModal.classList.remove('show');
+      showScreen('main-screen');
     }
   });
 
@@ -1141,6 +1079,8 @@
   const initialHash = location.hash.replace('#', '');
   if (initialHash === 'meditation') showScreen('meditation-screen');
   else if (initialHash === 'marathon') showScreen('marathon-screen');
+  else if (initialHash === 'help') showScreen('help-screen');
+  else if (initialHash === 'settings') showScreen('settings-screen');
   else showScreen('main-screen');
 </script>
 
