@@ -28,12 +28,12 @@
       align-items: center;
       justify-content: flex-start;
       padding: 16px;
-      overflow-x: hidden;
+      overflow: hidden;
     }
     .screen {
       width: 100%;
       max-width: 520px;
-      padding: 24px 12px;
+      padding: 24px 12px 100px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -54,9 +54,12 @@
       margin: 20px 0 16px;
     }
 
-    /* === Глобальная навигация — плавающая внизу === */
+    /* === Глобальная навигация — только иконки === */
     .global-nav {
-      position: static;
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
       gap: 8px;
       background: rgba(15, 15, 27, 0.85);
@@ -66,7 +69,6 @@
       z-index: 100;
       width: fit-content;
       max-width: calc(100% - 24px);
-      margin: 16px auto 0;
     }
     .nav-item {
       display: flex;
@@ -105,7 +107,6 @@
       font-weight: 600;
       transition: transform 0.2s, opacity 0.2s;
       margin: 12px 0;
-      margin-top: 16px;
     }
     .main-btn:hover {
       transform: translateY(-2px);
@@ -214,7 +215,6 @@
 
     #marathon-grid-container {
       margin-top: 16px;
-      margin-bottom: 16px;
     }
 
     .marathon-grid {
@@ -358,14 +358,6 @@
   <h1>Дыхательная практика спокойствия</h1>
   <button id="go-meditation-home" class="main-btn primary">Медитация</button>
   <button id="go-marathon-home" class="main-btn secondary">Марафон 7&nbsp;дней</button>
-  
-  <div class="global-nav">
-    <div class="nav-item" id="nav-main" title="Главная">🏠</div>
-    <div class="nav-item" id="nav-meditation" title="Медитация">🧘</div>
-    <div class="nav-item" id="nav-marathon" title="Марафон">🌸</div>
-    <div class="nav-item" id="nav-help" title="Инструкция">?</div>
-    <div class="nav-item" id="nav-settings" title="Настройки">⚙️</div>
-  </div>
 </div>
 
 <!-- Медитация -->
@@ -397,14 +389,6 @@
   </div>
 
   <div id="message"></div>
-  
-  <div class="global-nav">
-    <div class="nav-item" id="nav-main-2" title="Главная">🏠</div>
-    <div class="nav-item" id="nav-meditation-2" title="Медитация">🧘</div>
-    <div class="nav-item" id="nav-marathon-2" title="Марафон">🌸</div>
-    <div class="nav-item" id="nav-help-2" title="Инструкция">?</div>
-    <div class="nav-item" id="nav-settings-2" title="Настройки">⚙️</div>
-  </div>
 </div>
 
 <!-- Марафон -->
@@ -422,14 +406,6 @@
 
   <div id="marathon-grid-container" class="hidden">
     <div id="marathon-grid" class="marathon-grid"></div>
-  </div>
-  
-  <div class="global-nav">
-    <div class="nav-item" id="nav-main-3" title="Главная">🏠</div>
-    <div class="nav-item" id="nav-meditation-3" title="Медитация">🧘</div>
-    <div class="nav-item" id="nav-marathon-3" title="Марафон">🌸</div>
-    <div class="nav-item" id="nav-help-3" title="Инструкция">?</div>
-    <div class="nav-item" id="nav-settings-3" title="Настройки">⚙️</div>
   </div>
 </div>
 
@@ -471,14 +447,6 @@
   </p>
 
   <button id="back-to-main-from-help" class="main-btn secondary back-btn">← На главную</button>
-  
-  <div class="global-nav">
-    <div class="nav-item" id="nav-main-4" title="Главная">🏠</div>
-    <div class="nav-item" id="nav-meditation-4" title="Медитация">🧘</div>
-    <div class="nav-item" id="nav-marathon-4" title="Марафон">🌸</div>
-    <div class="nav-item" id="nav-help-4" title="Инструкция">?</div>
-    <div class="nav-item" id="nav-settings-4" title="Настройки">⚙️</div>
-  </div>
 </div>
 
 <!-- Настройки -->
@@ -505,14 +473,15 @@
   <div id="chakra-list"></div>
 
   <button id="back-to-main-from-settings" class="main-btn secondary back-btn">← На главную</button>
-  
-  <div class="global-nav">
-    <div class="nav-item" id="nav-main-5" title="Главная">🏠</div>
-    <div class="nav-item" id="nav-meditation-5" title="Медитация">🧘</div>
-    <div class="nav-item" id="nav-marathon-5" title="Марафон">🌸</div>
-    <div class="nav-item" id="nav-help-5" title="Инструкция">?</div>
-    <div class="nav-item" id="nav-settings-5" title="Настройки">⚙️</div>
-  </div>
+</div>
+
+<!-- Глобальная навигация — только иконки -->
+<div class="global-nav">
+  <div class="nav-item" id="nav-main" title="Главная">🏠</div>
+  <div class="nav-item" id="nav-meditation" title="Медитация">🧘</div>
+  <div class="nav-item" id="nav-marathon" title="Марафон">🌸</div>
+  <div class="nav-item" id="nav-help" title="Инструкция">?</div>
+  <div class="nav-item" id="nav-settings" title="Настройки">⚙️</div>
 </div>
 
 <script>
@@ -521,73 +490,22 @@
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById(screenId).classList.remove('hidden');
     
-    // Обновляем все экземпляры меню
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    if (screenId === 'main-screen') {
-      document.getElementById('nav-main').classList.add('active');
-      document.getElementById('nav-main-2').classList.add('active');
-      document.getElementById('nav-main-3').classList.add('active');
-      document.getElementById('nav-main-4').classList.add('active');
-      document.getElementById('nav-main-5').classList.add('active');
-    } else if (screenId === 'meditation-screen') {
-      document.getElementById('nav-meditation').classList.add('active');
-      document.getElementById('nav-meditation-2').classList.add('active');
-      document.getElementById('nav-meditation-3').classList.add('active');
-      document.getElementById('nav-meditation-4').classList.add('active');
-      document.getElementById('nav-meditation-5').classList.add('active');
-    } else if (screenId === 'marathon-screen') {
-      document.getElementById('nav-marathon').classList.add('active');
-      document.getElementById('nav-marathon-2').classList.add('active');
-      document.getElementById('nav-marathon-3').classList.add('active');
-      document.getElementById('nav-marathon-4').classList.add('active');
-      document.getElementById('nav-marathon-5').classList.add('active');
-    } else if (screenId === 'help-screen') {
-      document.getElementById('nav-help').classList.add('active');
-      document.getElementById('nav-help-2').classList.add('active');
-      document.getElementById('nav-help-3').classList.add('active');
-      document.getElementById('nav-help-4').classList.add('active');
-      document.getElementById('nav-help-5').classList.add('active');
-    } else if (screenId === 'settings-screen') {
-      document.getElementById('nav-settings').classList.add('active');
-      document.getElementById('nav-settings-2').classList.add('active');
-      document.getElementById('nav-settings-3').classList.add('active');
-      document.getElementById('nav-settings-4').classList.add('active');
-      document.getElementById('nav-settings-5').classList.add('active');
-    }
+    if (screenId === 'main-screen') document.getElementById('nav-main').classList.add('active');
+    else if (screenId === 'meditation-screen') document.getElementById('nav-meditation').classList.add('active');
+    else if (screenId === 'marathon-screen') document.getElementById('nav-marathon').classList.add('active');
+    else if (screenId === 'help-screen') document.getElementById('nav-help').classList.add('active');
+    else if (screenId === 'settings-screen') document.getElementById('nav-settings').classList.add('active');
     
     history.pushState(null, '', `#${screenId.replace('-screen', '')}`);
   }
 
-  // Навигация — все экземпляры
+  // Навигация
   document.getElementById('nav-main').addEventListener('click', () => showScreen('main-screen'));
   document.getElementById('nav-meditation').addEventListener('click', () => showScreen('meditation-screen'));
   document.getElementById('nav-marathon').addEventListener('click', () => showScreen('marathon-screen'));
   document.getElementById('nav-help').addEventListener('click', () => showScreen('help-screen'));
   document.getElementById('nav-settings').addEventListener('click', () => showScreen('settings-screen'));
-
-  document.getElementById('nav-main-2').addEventListener('click', () => showScreen('main-screen'));
-  document.getElementById('nav-meditation-2').addEventListener('click', () => showScreen('meditation-screen'));
-  document.getElementById('nav-marathon-2').addEventListener('click', () => showScreen('marathon-screen'));
-  document.getElementById('nav-help-2').addEventListener('click', () => showScreen('help-screen'));
-  document.getElementById('nav-settings-2').addEventListener('click', () => showScreen('settings-screen'));
-
-  document.getElementById('nav-main-3').addEventListener('click', () => showScreen('main-screen'));
-  document.getElementById('nav-meditation-3').addEventListener('click', () => showScreen('meditation-screen'));
-  document.getElementById('nav-marathon-3').addEventListener('click', () => showScreen('marathon-screen'));
-  document.getElementById('nav-help-3').addEventListener('click', () => showScreen('help-screen'));
-  document.getElementById('nav-settings-3').addEventListener('click', () => showScreen('settings-screen'));
-
-  document.getElementById('nav-main-4').addEventListener('click', () => showScreen('main-screen'));
-  document.getElementById('nav-meditation-4').addEventListener('click', () => showScreen('meditation-screen'));
-  document.getElementById('nav-marathon-4').addEventListener('click', () => showScreen('marathon-screen'));
-  document.getElementById('nav-help-4').addEventListener('click', () => showScreen('help-screen'));
-  document.getElementById('nav-settings-4').addEventListener('click', () => showScreen('settings-screen'));
-
-  document.getElementById('nav-main-5').addEventListener('click', () => showScreen('main-screen'));
-  document.getElementById('nav-meditation-5').addEventListener('click', () => showScreen('meditation-screen'));
-  document.getElementById('nav-marathon-5').addEventListener('click', () => showScreen('marathon-screen'));
-  document.getElementById('nav-help-5').addEventListener('click', () => showScreen('help-screen'));
-  document.getElementById('nav-settings-5').addEventListener('click', () => showScreen('settings-screen'));
 
   document.getElementById('go-meditation-home').addEventListener('click', () => showScreen('meditation-screen'));
   document.getElementById('go-marathon-home').addEventListener('click', () => showScreen('marathon-screen'));
@@ -1032,4 +950,146 @@
     row.className = 'chakra-row';
 
     const textDiv = document.createElement('div');
-    textDiv.className = 'chakra
+    textDiv.className = 'chakra-text';
+    textDiv.innerHTML = `
+      <div class="chakra-name">${chakra.name}</div>
+      <div class="chakra-hz">${chakra.hz} Гц</div>
+      <div class="chakra-desc">${chakraShortDescriptions[chakra.hz]}</div>
+    `;
+
+    const circle = document.createElement('div');
+    circle.className = 'chakra-circle';
+    circle.dataset.hz = chakra.hz;
+    circle.style.backgroundColor = chakra.color;
+    if (chakra.hz === currentFrequency) circle.classList.add('active');
+
+    circle.addEventListener('click', () => {
+      if (fullChakraCheckbox.checked) {
+        showMessage("Отключите «Полный цикл», чтобы выбрать частоту");
+        return;
+      }
+      document.querySelectorAll('.chakra-circle').forEach(c => c.classList.remove('active'));
+      circle.classList.add('active');
+      currentFrequency = chakra.hz;
+      if (!isPaused && endTime && !isMuted) {
+        startBackgroundTone(currentFrequency);
+      }
+    });
+
+    row.appendChild(textDiv);
+    row.appendChild(circle);
+    chakraList.appendChild(row);
+  });
+
+  fullChakraCheckbox.addEventListener('change', () => {
+    fullChakraCycle = fullChakraCheckbox.checked;
+    if (fullChakraCycle) {
+      document.querySelectorAll('.chakra-circle').forEach(c => c.classList.remove('active'));
+    }
+  });
+
+  breathVolumeSlider.addEventListener('input', () => {
+    hangVolumeLevel = parseFloat(breathVolumeSlider.value);
+  });
+
+  function showMessage(text) {
+    const el = document.getElementById('message');
+    el.textContent = text;
+    el.classList.add('show');
+  }
+
+  function resetToStart() {
+    stopSession();
+    document.getElementById('timer').textContent = '00:00';
+    document.getElementById('message').classList.remove('show');
+    durationControls.classList.remove('hidden');
+    playBtn.classList.add('hidden');
+    sessionControls.classList.add('hidden');
+    document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
+    selectedDuration = null;
+  }
+
+  const durationControls = document.getElementById('duration-controls');
+  const playBtn = document.getElementById('play-btn');
+  const sessionControls = document.getElementById('session-controls');
+
+  function updateTimer() {
+    if (isPaused) return;
+    const now = Date.now();
+    let remaining = endTime - now;
+    if (remaining <= 0) {
+      remaining = 0;
+      stopSession();
+      showMessage("Практика завершена. Спасибо за заботу о себе.");
+      setTimeout(resetToStart, 3000);
+      return;
+    }
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+    document.getElementById('timer').textContent = 
+      `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  document.querySelectorAll('#duration-controls button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedDuration = parseInt(btn.dataset.mins) * 60 * 1000;
+      playBtn.classList.remove('hidden');
+      playBtn.style.display = 'inline-block';
+    });
+  });
+
+  playBtn.addEventListener('click', () => {
+    if (selectedDuration) {
+      startSession(selectedDuration);
+      durationControls.classList.add('hidden');
+      playBtn.classList.add('hidden');
+      sessionControls.classList.remove('hidden');
+    }
+  });
+
+  document.getElementById('pause-btn').addEventListener('click', pauseResumeSession);
+  document.getElementById('stop-btn').addEventListener('click', resetToStart);
+  document.getElementById('mute-btn').addEventListener('click', () => {
+    isMuted = !isMuted;
+    if (isMuted) {
+      stopBackgroundTone();
+      document.getElementById('mute-btn').textContent = '🔈 Со звуком';
+    } else {
+      if (fullChakraCycle) {
+        startChakraCycle(totalMs);
+      } else if (!isPaused && endTime) {
+        startBackgroundTone(currentFrequency);
+      }
+      document.getElementById('mute-btn').textContent = '🔇 Без звука';
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      showScreen('main-screen');
+    }
+  });
+
+  document.querySelector('.chakra-circle').classList.add('active');
+
+  // Инициализация
+  renderMarathonGrid();
+  const initialHash = location.hash.replace('#', '');
+  if (initialHash === 'meditation') showScreen('meditation-screen');
+  else if (initialHash === 'marathon') showScreen('marathon-screen');
+  else if (initialHash === 'help') showScreen('help-screen');
+  else if (initialHash === 'settings') showScreen('settings-screen');
+  else showScreen('main-screen');
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
