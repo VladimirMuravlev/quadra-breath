@@ -189,6 +189,15 @@
       cursor: pointer;
       transition: all 0.3s ease;
     }
+    .controls button:hover {
+      background: rgba(30, 40, 80, 0.8);
+      transform: translateY(-2px);
+    }
+    .controls button.active {
+      background: #4cc9f0;
+      color: #0f0f1b;
+      transform: none;
+    }
 
     #play-btn {
       background: linear-gradient(120deg, #4361ee, #4cc9f0);
@@ -394,6 +403,9 @@
 
   <div id="marathon-grid-container" class="hidden">
     <div id="marathon-grid" class="marathon-grid"></div>
+    <button id="reset-marathon-from-marathon" class="main-btn secondary" style="margin-top: 24px;">
+      Начать марафон заново
+    </button>
   </div>
 </div>
 
@@ -474,7 +486,6 @@
 <script>
   // === НАВИГАЦИЯ ===
   function showScreen(screenId) {
-    // Если уходим с медитации — останавливаем без записи
     if (location.hash === '#meditation' && screenId !== 'meditation-screen') {
       stopSessionWithoutSaving();
     }
@@ -495,7 +506,6 @@
     history.pushState(null, '', `#${screenId.replace('-screen', '')}`);
   }
 
-  // === КНОПКИ НАВИГАЦИИ ===
   document.getElementById('nav-main').addEventListener('click', () => showScreen('main-screen'));
   document.getElementById('nav-meditation').addEventListener('click', () => showScreen('meditation-screen'));
   document.getElementById('nav-marathon').addEventListener('click', () => showScreen('marathon-screen'));
@@ -601,12 +611,23 @@
 
   document.getElementById('start-marathon-btn').addEventListener('click', startMarathon);
 
-  // === СБРОС МАРАФОНА В НАСТРОЙКАХ ===
+  // === СБРОС МАРАФОНА (из Настроек) ===
   document.getElementById('reset-marathon-btn').addEventListener('click', () => {
     if (confirm('Сбросить прогресс марафона?')) {
       localStorage.removeItem('marathon_progress');
       renderMarathonGrid();
       showMessage("Прогресс марафона сброшен.");
+    }
+  });
+
+  // === СБРОС МАРАФОНА (из Марафона) ===
+  document.getElementById('reset-marathon-from-marathon').addEventListener('click', () => {
+    if (confirm('Сбросить прогресс марафона? Все 8 дней будут сброшены.')) {
+      localStorage.removeItem('marathon_progress');
+      document.getElementById('marathon-start-section').classList.remove('hidden');
+      document.getElementById('marathon-grid-container').classList.add('hidden');
+      renderMarathonGrid();
+      showMessage("Марафон сброшен. Начните заново!");
     }
   });
 
@@ -850,7 +871,6 @@
     stopBackgroundTone();
     stopChakraCycle();
     
-    // Сохраняем прогресс ТОЛЬКО если сессия завершена полностью
     if (location.hash === '#meditation' && selectedDuration) {
       markDayCompleted(selectedDuration);
     }
@@ -969,6 +989,19 @@
   const playBtn = document.getElementById('play-btn');
   const sessionControls = document.getElementById('session-controls');
 
+  // === ВЫБОР ВРЕМЕНИ ===
+  document.querySelectorAll('#duration-controls button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#duration-controls button').forEach(b => {
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+      selectedDuration = parseInt(btn.dataset.mins) * 60 * 1000;
+      playBtn.classList.remove('hidden');
+      playBtn.style.display = 'inline-block';
+    });
+  });
+
   function updateTimer() {
     if (isPaused) return;
     const now = Date.now();
@@ -985,16 +1018,6 @@
     document.getElementById('timer').textContent = 
       `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
-
-  document.querySelectorAll('#duration-controls button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedDuration = parseInt(btn.dataset.mins) * 60 * 1000;
-      playBtn.classList.remove('hidden');
-      playBtn.style.display = 'inline-block';
-    });
-  });
 
   playBtn.addEventListener('click', () => {
     if (selectedDuration) {
