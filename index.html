@@ -33,7 +33,7 @@
     .screen {
       width: 100%;
       max-width: 520px;
-      padding: 24px 12px;
+      padding: 24px 12px 90px; /* отступ под фиксированное меню */
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -54,18 +54,18 @@
       margin: 20px 0 16px;
     }
 
-    /* === Глобальная навигация === */
+    /* === Фиксированное меню внизу === */
     .global-nav {
-      position: static;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
       display: flex;
+      justify-content: center;
       gap: 8px;
       background: rgba(15, 15, 27, 0.85);
-      border: 1px solid #4cc9f0;
-      border-radius: 30px;
-      padding: 6px;
-      width: fit-content;
-      max-width: calc(100% - 24px);
-      margin: 16px auto 0;
+      border-top: 1px solid #4cc9f0;
+      padding: 8px 0;
       z-index: 100;
     }
     .nav-item {
@@ -336,15 +336,23 @@
       margin: 20px 0;
       text-align: left;
     }
-    #message {
-      margin-top: 22px;
-      font-size: 1.15rem;
-      min-height: 28px;
-      opacity: 0;
-      transition: opacity 0.5s;
+
+    /* === Кнопка сброса марафона === */
+    .reset-btn {
+      margin-top: 12px;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      background: transparent;
+      border: 1px solid #4cc9f0;
+      color: #a9a9d6;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
-    #message.show {
-      opacity: 1;
+    .reset-btn:active {
+      background: rgba(76, 201, 240, 0.2);
+      color: white;
+      transform: scale(0.98);
     }
   </style>
 </head>
@@ -384,8 +392,6 @@
     <button id="stop-btn">⏹ Стоп</button>
     <button id="mute-btn">🔇 Без звука</button>
   </div>
-
-  <div id="message"></div>
 </div>
 
 <!-- Марафон -->
@@ -466,12 +472,12 @@
   <h3 style="margin: 22px 0 14px; color: #a9a9d6;">Частоты чакр:</h3>
   <div id="chakra-list"></div>
 
-  <button id="reset-marathon-btn" style="margin-top: 12px; padding: 6px 14px; font-size: 0.85rem; background: transparent; border: 1px solid #4cc9f0; color: #a9a9d6; border-radius: 16px; cursor: pointer;">
+  <button id="reset-marathon-btn" class="reset-btn">
     Начать марафон заново
   </button>
 </div>
 
-<!-- Глобальная навигация -->
+<!-- Глобальное меню -->
 <div class="global-nav">
   <div class="nav-item" id="nav-main" title="Главная">🏠</div>
   <div class="nav-item" id="nav-meditation" title="Медитация">🧘</div>
@@ -481,6 +487,23 @@
 </div>
 
 <script>
+  // === СТИЛИ ДЛЯ УВЕДОМЛЕНИЙ ===
+  if (!document.getElementById('notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'notification-styles';
+    style.textContent = `
+      @keyframes fadeShow { 
+        from { opacity: 0; transform: translate(-50%, 10px); } 
+        to { opacity: 1; transform: translate(-50%, 0); } 
+      }
+      @keyframes fadeHide { 
+        from { opacity: 1; } 
+        to { opacity: 0; } 
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   // === НАВИГАЦИЯ ===
   function showScreen(screenId) {
     if (location.hash === '#meditation' && screenId !== 'meditation-screen') {
@@ -624,19 +647,42 @@
 
   document.getElementById('start-marathon-btn').addEventListener('click', startMarathon);
 
-  // === СБРОС МАРАФОНА (только из Настроек, без подтверждения) ===
+  // === СБРОС МАРАФОНА ===
   function resetMarathon() {
     localStorage.removeItem('marathon_progress');
     
-    // Обновляем вид страницы Марафона, если она сейчас открыта
     const progress = getMarathonProgress();
     if (!progress.active) {
-      document.getElementById('marathon-start-section').classList.remove('hidden');
-      document.getElementById('marathon-grid-container').classList.add('hidden');
-      renderMarathonGrid();
+      const startSection = document.getElementById('marathon-start-section');
+      const gridContainer = document.getElementById('marathon-grid-container');
+      if (startSection && gridContainer) {
+        startSection.classList.remove('hidden');
+        gridContainer.classList.add('hidden');
+        renderMarathonGrid();
+      }
     }
     
-    showMessage("Марафон сброшен. Начните заново в любое время.");
+    const notify = document.createElement('div');
+    notify.textContent = "Марафон сброшен. Начните заново в любое время.";
+    notify.style.cssText = `
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(22, 33, 62, 0.9);
+      color: #d0d0f5;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 0.95rem;
+      z-index: 200;
+      opacity: 0;
+      animation: fadeShow 0.3s forwards, fadeHide 0.3s forwards 2.7s;
+    `;
+    document.body.appendChild(notify);
+    
+    setTimeout(() => {
+      if (notify.parentNode) notify.parentNode.removeChild(notify);
+    }, 3000);
   }
 
   document.getElementById('reset-marathon-btn').addEventListener('click', resetMarathon);
@@ -821,7 +867,6 @@
       s.classList.remove('active');
       s.style.background = '';
     });
-    document.getElementById('message').classList.remove('show');
 
     totalMs = durationMs;
     startTime = Date.now();
@@ -960,7 +1005,26 @@
 
       circle.addEventListener('click', () => {
         if (fullChakraCheckbox.checked) {
-          showMessage("Отключите «Полный цикл», чтобы выбрать частоту");
+          const notify = document.createElement('div');
+          notify.textContent = "Отключите «Полный цикл», чтобы выбрать частоту";
+          notify.style.cssText = `
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(22, 33, 62, 0.9);
+            color: #d0d0f5;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            z-index: 200;
+            opacity: 0;
+            animation: fadeShow 0.3s forwards, fadeHide 0.3s forwards 2s;
+          `;
+          document.body.appendChild(notify);
+          setTimeout(() => {
+            if (notify.parentNode) notify.parentNode.removeChild(notify);
+          }, 2000);
           return;
         }
         document.querySelectorAll('.chakra-circle').forEach(c => c.classList.remove('active'));
@@ -977,17 +1041,9 @@
     });
   }
 
-  function showMessage(text) {
-    const el = document.getElementById('message');
-    el.textContent = text;
-    el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 3000);
-  }
-
   function resetToStart() {
     stopSession();
     document.getElementById('timer').textContent = '00:00';
-    document.getElementById('message').classList.remove('show');
     durationControls.classList.remove('hidden');
     playBtn.classList.add('hidden');
     sessionControls.classList.add('hidden');
@@ -1019,8 +1075,27 @@
     if (remaining <= 0) {
       remaining = 0;
       stopSession();
-      showMessage("Практика завершена. Спасибо за заботу о себе.");
-      setTimeout(resetToStart, 3000);
+      const notify = document.createElement('div');
+      notify.textContent = "Практика завершена. Спасибо за заботу о себе.";
+      notify.style.cssText = `
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(22, 33, 62, 0.9);
+        color: #d0d0f5;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-size: 0.95rem;
+        z-index: 200;
+        opacity: 0;
+        animation: fadeShow 0.3s forwards, fadeHide 0.3s forwards 3s;
+      `;
+      document.body.appendChild(notify);
+      setTimeout(() => {
+        if (notify.parentNode) notify.parentNode.removeChild(notify);
+        resetToStart();
+      }, 3000);
       return;
     }
     const mins = Math.floor(remaining / 60000);
