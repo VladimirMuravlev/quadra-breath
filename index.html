@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Дыхательная практика спокойствия </title>
-  <meta name="description" content="Практика с звуками ханга и чакральными частотами">
+  <title>Дыхательная практика спокойствия</title>
+  <meta name="description" content="Медитативная практика квадратного дыхания со звуками ханга и чакральными частотами для глубокого спокойствия">
 
   <!-- PWA manifest -->
   <link rel="manifest" href="manifest.json">
@@ -26,27 +26,105 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       padding: 16px;
-      overflow: hidden;
+      overflow-x: hidden;
     }
-    #app {
-      text-align: center;
+    .screen {
       width: 100%;
       max-width: 520px;
-      padding: 0 12px;
+      padding: 24px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
     }
-    h1 {
+    .hidden {
+      display: none !important;
+    }
+    h1, h2 {
       font-size: 1.9rem;
-      margin-bottom: 22px;
-      opacity: 0.92;
+      margin: 16px 0 24px;
+      opacity: 0.95;
+      font-weight: 600;
+    }
+    h2 {
+      font-size: 1.5rem;
+      color: #4cc9f0;
+      margin: 20px 0 16px;
     }
 
+    /* === Глобальная навигация — плавающая внизу === */
+    .global-nav {
+      position: static;
+      display: flex;
+      gap: 8px;
+      background: rgba(15, 15, 27, 0.85);
+      border: 1px solid #4cc9f0;
+      border-radius: 30px;
+      padding: 6px;
+      width: fit-content;
+      max-width: calc(100% - 24px);
+      margin: 16px auto 0;
+      z-index: 100;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.15rem;
+      color: #a9a9d6;
+      transition: all 0.2s;
+    }
+    .nav-item.active, .nav-item:hover {
+      color: white;
+      background: rgba(76, 201, 240, 0.2);
+      transform: scale(1.05);
+    }
+    @media (max-width: 320px) {
+      .nav-item {
+        width: 40px;
+        height: 40px;
+        font-size: 1.05rem;
+      }
+    }
+
+    /* === Кнопки действия === */
+    .main-btn {
+      width: 100%;
+      max-width: 320px;
+      padding: 16px;
+      font-size: 1.25rem;
+      border: none;
+      border-radius: 24px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.2s, opacity 0.2s;
+      margin: 12px 0;
+    }
+    .main-btn:hover {
+      transform: translateY(-2px);
+    }
+    .main-btn.primary {
+      background: linear-gradient(120deg, #4361ee, #4cc9f0);
+      color: white;
+    }
+    .main-btn.secondary {
+      background: rgba(22, 33, 62, 0.7);
+      color: #d0d0f5;
+      border: 1px solid #4cc9f0;
+    }
+
+    /* === Медитация === */
     #breath-circle {
-      width: 260px;
-      height: 260px;
+      width: 240px;
+      height: 240px;
       position: relative;
-      margin: 0 auto 24px;
+      margin: 20px auto;
       border-radius: 50%;
       overflow: hidden;
       box-shadow: 0 0 20px rgba(76, 201, 240, 0.15);
@@ -73,26 +151,26 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       background: #4cc9f0;
       border-radius: 50%;
       transform: translate(-50%, -50%);
-      box-shadow: 0 0 14px rgba(76, 201, 240, 0.7);
+      box-shadow: 0 0 12px rgba(76, 201, 240, 0.6);
       z-index: 2;
     }
 
     #timer {
-      font-size: 1.25rem;
+      font-size: 1.3rem;
       margin: 18px 0;
       letter-spacing: 1px;
       opacity: 0.9;
     }
 
     .section-title {
-      font-size: 1.35rem;
-      margin: 22px 0 14px;
-      opacity: 0.95;
+      font-size: 1.3rem;
+      margin: 20px 0 16px;
+      opacity: 0.92;
     }
 
     .controls {
@@ -100,123 +178,85 @@
       flex-wrap: wrap;
       gap: 12px;
       justify-content: center;
-      margin-top: 10px;
+      margin-top: 12px;
     }
-    button {
+    .controls button {
       background: rgba(22, 33, 62, 0.6);
       color: #d0d0f5;
       border: 1px solid #4cc9f0;
-      border-radius: 24px;
-      padding: 10px 20px;
-      font-size: 1.05rem;
+      border-radius: 22px;
+      padding: 10px 18px;
+      font-size: 1rem;
       cursor: pointer;
       transition: all 0.3s ease;
-    }
-    button:hover {
-      background: rgba(30, 40, 80, 0.8);
-      transform: translateY(-2px);
-    }
-    button.active {
-      background: #4cc9f0;
-      color: #0f0f1b;
-    }
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
     }
 
     #play-btn {
       background: linear-gradient(120deg, #4361ee, #4cc9f0);
       color: white;
-      font-size: 1.3rem;
-      padding: 14px 32px;
-      margin-top: 16px;
+      font-size: 1.25rem;
+      padding: 14px 30px;
+      margin: 20px 0 12px;
       border: none;
-      border-radius: 28px;
+      border-radius: 26px;
       box-shadow: 0 4px 12px rgba(76, 201, 240, 0.3);
       display: none;
     }
 
-    .bottom-buttons {
-      display: flex;
-      gap: 30px;
-      margin-top: 20px;
-      justify-content: center;
-    }
-    .icon-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: rgba(22, 33, 62, 0.7);
-      border: 1px solid #4cc9f0;
-      color: #4cc9f0;
-      font-size: 1.4rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
-    }
-    .icon-btn:hover {
-      background: rgba(15, 23, 42, 0.9);
+    /* === Марафон === */
+    .marathon-description {
+      font-size: 1.05rem;
+      opacity: 0.9;
+      margin: 16px 0 24px;
+      line-height: 1.5;
     }
 
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
+    #marathon-start-section,
+    #marathon-grid-container {
+      margin: 16px 0;
+    }
+
+    .marathon-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
       width: 100%;
-      height: 100%;
-      background: rgba(15, 15, 27, 0.88);
-      display: none;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 320px) {
+      .marathon-grid {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 220px;
+      }
+    }
+
+    .marathon-day {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: rgba(22, 33, 62, 0.5);
+      display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    .modal.show {
-      display: flex;
-      opacity: 1;
-    }
-    .modal-content {
-      background: #16213e;
-      border: 1px solid #4cc9f0;
-      border-radius: 18px;
-      padding: 24px 24px 40px; /* padding-bottom увеличен */
-      max-width: 94%;
-      width: 380px;
-      max-height: 82vh;
-      overflow-y: auto;
-      color: #d0d0f5;
-    }
-    .modal h2 {
-      font-size: 1.45rem;
-      margin-bottom: 20px;
-      color: #4cc9f0;
-      text-align: center;
-    }
-    .modal-close {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      background: none;
-      border: none;
+      font-size: 0.8rem;
       color: #a9a9d6;
-      font-size: 1.5rem;
-      cursor: pointer;
+      border: 2px solid rgba(76, 201, 240, 0.2);
     }
-    .modal-close:hover {
-      color: #f72585;
+    .marathon-day.completed {
+      background: linear-gradient(135deg, #4361ee, #4cc9f0);
+      color: white;
+      font-size: 1.4rem;
+      border-color: transparent;
+      box-shadow: 0 0 10px rgba(76, 201, 240, 0.4);
     }
 
     .volume-control {
-      margin-bottom: 22px;
+      margin: 24px 0;
     }
     .volume-control label {
       display: block;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       font-size: 1.05rem;
     }
     input[type="range"] {
@@ -239,9 +279,9 @@
     #chakra-list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      margin-top: 16px;
-      max-height: calc(82vh - 240px); /* адаптивная высота */
+      gap: 14px;
+      margin: 16px 0;
+      max-height: 360px;
       overflow-y: auto;
       padding-right: 6px;
     }
@@ -291,19 +331,9 @@
     }
 
     #chakra-mode {
-      margin: 18px 0;
+      margin: 20px 0;
       text-align: left;
     }
-    #chakra-mode label {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.98rem;
-    }
-    #chakra-mode input {
-      accent-color: #4cc9f0;
-    }
-
     #message {
       margin-top: 22px;
       font-size: 1.15rem;
@@ -314,542 +344,742 @@
     #message.show {
       opacity: 1;
     }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .bottom-label {
-      font-size: 0.86rem;
-      opacity: 0.82;
-      margin-top: 6px;
-    }
   </style>
 </head>
 <body>
-  <div id="app">
-    <h1>Дыхательная практика спокойствия</h1>
-    <div id="breath-circle">
-      <div class="segment" id="segment1"></div>
-      <div class="segment" id="segment2"></div>
-      <div class="segment" id="segment3"></div>
-      <div class="segment" id="segment4"></div>
-      <div class="center-dot"></div>
-    </div>
-    <div id="timer">00:00</div>
 
-    <div class="section-title">Выбери время медитации</div>
-    <div id="duration-controls" class="controls">
-      <button data-mins="10">10 минут</button>
-      <button data-mins="20">20 минут</button>
-      <button data-mins="30">30 минут</button>
-      <button data-mins="60">1 час</button>
-    </div>
+<!-- Главная -->
+<div id="main-screen" class="screen">
+  <h1>Дыхательная практика спокойствия</h1>
+  <button id="go-meditation-home" class="main-btn primary">Медитация</button>
+  <button id="go-marathon-home" class="main-btn secondary">Марафон 7&nbsp;дней</button>
+</div>
 
-    <button id="play-btn">▶ Начать</button>
+<!-- Медитация -->
+<div id="meditation-screen" class="screen hidden">
+  <h1>Медитация</h1>
+  <div id="breath-circle">
+    <div class="segment" id="segment1"></div>
+    <div class="segment" id="segment2"></div>
+    <div class="segment" id="segment3"></div>
+    <div class="segment" id="segment4"></div>
+    <div class="center-dot"></div>
+  </div>
+  <div id="timer">00:00</div>
 
-    <div id="session-controls" class="controls hidden" style="margin-top: 16px;">
-      <button id="pause-btn">⏸ Пауза</button>
-      <button id="stop-btn">⏹ Стоп</button>
-      <button id="mute-btn">🔇 Без звука</button>
-    </div>
-
-    <div class="bottom-buttons">
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
-        <button id="help-btn" class="icon-btn" aria-label="Инструкция">?</button>
-        <span class="bottom-label">Инструкция</span>
-      </div>
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
-        <button id="settings-btn" class="icon-btn" aria-label="Настройки">⚙️</button>
-        <span class="bottom-label">Настройки</span>
-      </div>
-    </div>
-    <div id="message"></div>
+  <div class="section-title">Выбери время медитации</div>
+  <div id="duration-controls" class="controls">
+    <button data-mins="10">10 минут</button>
+    <button data-mins="20">20 минут</button>
+    <button data-mins="30">30 минут</button>
+    <button data-mins="60">1 час</button>
   </div>
 
-  <div id="help-modal" class="modal">
-    <div class="modal-content">
-      <button class="modal-close" id="help-close">✕</button>
-      <h2>Дыхательная практика спокойствия</h2>
-      <p><strong>4–4–4–4:</strong></p>
-      <p>1. <strong>Вдох</strong> — 4 сек</p>
-      <p>2. <strong>Задержка</strong> — 4 сек</p>
-      <p>3. <strong>Выдох</strong> — 4 сек</p>
-      <p>4. <strong>Задержка</strong> — 4 сек</p>
+  <button id="play-btn">▶ Начать</button>
 
-      <p style="margin-top: 16px; font-size: 0.96rem; opacity: 0.9;">
-        Этот ритм успокаивает нервную систему, снижает тревожность и улучшает концентрацию.
-      </p>
-
-      <h3 style="margin: 16px 0 8px; color: #4cc9f0; font-size: 1.15rem;">🌀 Полный цикл чакр</h3>
-      <p style="font-size: 0.96rem; opacity: 0.9;">
-        Включите режим «Полный цикл чакр» — звук мягко пройдёт от Муладхары до Единства и обратно.
-      </p>
-      <p style="font-size: 0.96rem; opacity: 0.9; margin-bottom: 12px;">
-        Такая практика помогает гармонизировать энергетические центры тела, углубляя медитацию и ощущение целостности.
-      </p>
-
-      <div style="
-        background: rgba(255, 255, 255, 0.08);
-        border-left: 3px solid #f72585;
-        padding: 10px;
-        font-size: 0.86rem;
-        opacity: 0.86;
-      ">
-        ⚠️ <strong>Важно:</strong> Чакральные частоты используются в рамках звуковой медитации и не являются медицинским или терапевтическим инструментом. Эффекты субъективны и не заменяют профессиональную медицинскую помощь. Практикуйте осознанно.
-      </div>
-
-      <p style="margin-top: 12px; font-size: 0.92rem; opacity: 0.86;">
-        🎧 Для полного эффекта рекомендуется использовать наушники.
-      </p>
-    </div>
+  <div id="session-controls" class="controls hidden" style="margin-top: 16px;">
+    <button id="pause-btn">⏸ Пауза</button>
+    <button id="stop-btn">⏹ Стоп</button>
+    <button id="mute-btn">🔇 Без звука</button>
   </div>
 
-  <div id="settings-modal" class="modal">
-    <div class="modal-content">
-      <button class="modal-close" id="settings-close">✕</button>
-      <h2>Настройки звука</h2>
+  <div id="message"></div>
+</div>
 
-      <p style="font-size: 0.92rem; opacity: 0.86; margin-bottom: 14px;">
-        🎧 Используйте наушники для полного эффекта.
-      </p>
+<!-- Марафон -->
+<div id="marathon-screen" class="screen hidden">
+  <h2>Марафон «7 дней спокойствия»</h2>
+  
+  <p class="marathon-description">
+    Каждый день — шаг к внутренней тишине.<br>
+    Нажмите «Начать марафон», чтобы отслеживать свой прогресс.
+  </p>
 
-      <div class="volume-control">
-        <label for="breath-volume">Громкость звука сегментов</label>
-        <input type="range" id="breath-volume" min="0" max="50" value="30">
-      </div>
-
-      <div id="chakra-mode">
-        <label>
-          <input type="checkbox" id="full-chakra-cycle">
-          - полный цикл активации всех чакр или
-        </label>
-      </div>
-
-      <h3 style="margin: 22px 0 14px; color: #a9a9d6; font-size: 1.1rem;">Выбери проработку одной чакры:</h3>
-      <div id="chakra-list"></div>
-    </div>
+  <div id="marathon-start-section">
+    <button id="start-marathon-btn" class="main-btn primary">Начать марафон</button>
   </div>
 
-  <script>
-    const phaseDuration = 4000;
-    let totalMs = null;
-    let endTime = null;
-    let startTime = null;
-    let timerInterval = null;
-    let phaseInterval = null;
-    let isMuted = false;
-    let isPaused = false;
-    let audioContext = null;
-    let currentPhaseIndex = 0;
-    let selectedDuration = null;
-    let fullChakraCycle = false;
-    let chakraCycleInterval = null;
-    let phaseStartTime = null;
+  <div id="marathon-grid-container" class="hidden">
+    <div id="marathon-grid" class="marathon-grid"></div>
+  </div>
+</div>
 
-    const BG_VOLUME = 0.05;
-    let hangVolumeLevel = 0.3;
+<!-- Инструкция -->
+<div id="help-screen" class="screen hidden">
+  <h2>Инструкция</h2>
+  
+  <p><strong>Квадратное дыхание (4–4–4–4):</strong></p>
+  <p>1. <strong>Вдох</strong> — 4 сек</p>
+  <p>2. <strong>Задержка</strong> — 4 сек</p>
+  <p>3. <strong>Выдох</strong> — 4 сек</p>
+  <p>4. <strong>Задержка</strong> — 4 сек</p>
 
-    const sectors = [
-      document.getElementById('segment1'),
-      document.getElementById('segment2'),
-      document.getElementById('segment3'),
-      document.getElementById('segment4')
-    ];
+  <p style="margin: 16px 0; opacity: 0.9;">
+    Этот ритм успокаивает нервную систему и снижает тревожность.
+  </p>
 
-    const hangNotes = [293.7, 349.2, 392.0, 466.2];
+  <h3 style="margin: 20px 0 12px; color: #4cc9f0;">🌀 Марафон 7 дней</h3>
+  <p style="opacity: 0.9; margin-bottom: 16px;">
+    Марафон помогает выработать устойчивую привычку медитации.<br>
+    Каждый день вы завершаете одну сессию — и видите свой прогресс.<br>
+    Это укрепляет мотивацию и углубляет эффект практики.
+  </p>
 
-    const chakras = [
-      { name: "Муладхара", hz: 174, color: "#ff0000" },
-      { name: "Свадхистхана", hz: 285, color: "#ff8000" },
-      { name: "Манипура", hz: 396, color: "#ffff00" },
-      { name: "Анахата", hz: 417, color: "#00ff00" },
-      { name: "Вишудха", hz: 528, color: "#00ffff" },
-      { name: "Аджна", hz: 639, color: "#0000ff" },
-      { name: "Сахасрара", hz: 741, color: "#8000ff" },
-      { name: "Космос", hz: 852, color: "#00ffff" },
-      { name: "Единство", hz: 963, color: "#ffd700" }
-    ];
+  <h3 style="margin: 20px 0 12px; color: #4cc9f0;">🎵 Чакральные частоты</h3>
+  <p style="opacity: 0.9; margin-bottom: 16px;">
+    На основе исследований:<br>
+    <strong>174 Гц</strong> — безопасность, <strong>285 Гц</strong> — восстановление,<br>
+    <strong>396 Гц</strong> — освобождение, <strong>528 Гц</strong> — трансформация,<br>
+    <strong>963 Гц</strong> — ощущение единства.
+  </p>
 
-    const chakraShortDescriptions = {
-      174: "Естественное обезболивающее средство. Даёт орга-нам чувство безопасности и любви.",
-      285: "Помогает восстанавливать ткани и возвращать их к первоначальному виду.",
-      396: "Освобождает от чувства вины и страха, позволяя начать заново.",
-      417: "Отменяет прошлые травмы и способствует внутренним изменениям.",
-      528: "Частота чуда. Способствует трансформации, ясности ума и восстановлению.",
-      639: "Гармонизирует отношения и раскрывает сердечный центр.",
-      741: "Решает проблемы, очищает от токсинов и расширяет сознание.",
-      852: "Пробуждает интуицию и возвращает к духовному порядку.",
-      963: "Связывает с потоком Света и ощущением единства со Всем."
+  <div style="background: rgba(255,255,255,0.08); border-left: 3px solid #f72585; padding: 11px; font-size: 0.85rem; opacity: 0.85; margin: 16px 0;">
+    ⚠️ Чакральные частоты используются в рамках звуковой медитации и не являются медицинским инструментом.
+  </div>
+
+  <p style="margin-top: 16px; opacity: 0.85;">
+    🎧 Используйте наушники для полного эффекта.
+  </p>
+
+  <button id="back-to-main-from-help" class="main-btn secondary">← На главную</button>
+</div>
+
+<!-- Настройки -->
+<div id="settings-screen" class="screen hidden">
+  <h2>Настройки звука</h2>
+
+  <p style="opacity: 0.86; margin: 16px 0;">
+    🎧 Используйте наушники для полного эффекта.
+  </p>
+
+  <div class="volume-control">
+    <label for="breath-volume">Громкость звука сегментов</label>
+    <input type="range" id="breath-volume" min="0" max="50" value="30">
+  </div>
+
+  <div id="chakra-mode">
+    <label>
+      <input type="checkbox" id="full-chakra-cycle">
+      Полный цикл чакр (вверх → вниз)
+    </label>
+  </div>
+
+  <h3 style="margin: 22px 0 14px; color: #a9a9d6;">Частоты чакр:</h3>
+  <div id="chakra-list"></div>
+
+  <button id="back-to-main-from-settings" class="main-btn secondary">← На главную</button>
+</div>
+
+<!-- Глобальная навигация — плавающая внизу -->
+<div class="global-nav">
+  <div class="nav-item" id="nav-main" title="Главная">🏠</div>
+  <div class="nav-item" id="nav-meditation" title="Медитация">🧘</div>
+  <div class="nav-item" id="nav-marathon" title="Марафон">🌸</div>
+  <div class="nav-item" id="nav-help" title="Инструкция">?</div>
+  <div class="nav-item" id="nav-settings" title="Настройки">⚙️</div>
+</div>
+
+<script>
+  // === НАВИГАЦИЯ ===
+  function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById(screenId).classList.remove('hidden');
+    
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    if (screenId === 'main-screen') document.getElementById('nav-main').classList.add('active');
+    else if (screenId === 'meditation-screen') document.getElementById('nav-meditation').classList.add('active');
+    else if (screenId === 'marathon-screen') document.getElementById('nav-marathon').classList.add('active');
+    else if (screenId === 'help-screen') document.getElementById('nav-help').classList.add('active');
+    else if (screenId === 'settings-screen') document.getElementById('nav-settings').classList.add('active');
+    
+    history.pushState(null, '', `#${screenId.replace('-screen', '')}`);
+  }
+
+  document.getElementById('nav-main').addEventListener('click', () => showScreen('main-screen'));
+  document.getElementById('nav-meditation').addEventListener('click', () => showScreen('meditation-screen'));
+  document.getElementById('nav-marathon').addEventListener('click', () => showScreen('marathon-screen'));
+  document.getElementById('nav-help').addEventListener('click', () => showScreen('help-screen'));
+  document.getElementById('nav-settings').addEventListener('click', () => showScreen('settings-screen'));
+
+  document.getElementById('go-meditation-home').addEventListener('click', () => showScreen('meditation-screen'));
+  document.getElementById('go-marathon-home').addEventListener('click', () => showScreen('marathon-screen'));
+  document.getElementById('back-to-main-from-help').addEventListener('click', () => showScreen('main-screen'));
+  document.getElementById('back-to-main-from-settings').addEventListener('click', () => showScreen('main-screen'));
+
+  window.addEventListener('popstate', () => {
+    const hash = location.hash.replace('#', '');
+    if (hash === 'meditation') showScreen('meditation-screen');
+    else if (hash === 'marathon') showScreen('marathon-screen');
+    else if (hash === 'help') showScreen('help-screen');
+    else if (hash === 'settings') showScreen('settings-screen');
+    else showScreen('main-screen');
+  });
+
+  // === МАРАФОН ===
+  function getMarathonProgress() {
+    const data = localStorage.getItem('marathon_progress');
+    return data ? JSON.parse(data) : { 
+      active: false, 
+      days: {}, 
+      startDate: null,
+      completed: false 
     };
+  }
 
-    let currentBackgroundOscillator = null;
-    let currentBackgroundGain = null;
-    let currentFrequency = 396;
-
-    function buildChakraSequence() {
-      const up = Array.from({length: 9}, (_, i) => i);
-      const down = Array.from({length: 7}, (_, i) => 7 - i);
-      return [...up, ...down];
+  function startMarathon() {
+    const progress = getMarathonProgress();
+    if (!progress.active) {
+      progress.active = true;
+      progress.startDate = new Date().toISOString().split('T')[0];
+      localStorage.setItem('marathon_progress', JSON.stringify(progress));
     }
+    document.getElementById('marathon-start-section').classList.add('hidden');
+    document.getElementById('marathon-grid-container').classList.remove('hidden');
+    renderMarathonGrid();
+  }
 
-    function playHangSound(frequency) {
-      if (isMuted || typeof window.AudioContext === 'undefined') return;
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  function saveMarathonProgress(day) {
+    const progress = getMarathonProgress();
+    if (!progress.active) return;
+    const today = new Date().toISOString().split('T')[0];
+    const todayIndex = Math.floor((new Date(today) - new Date(progress.startDate)) / (1000 * 60 * 60 * 24)) + 1;
+    if (todayIndex === day && (!progress.days[day] || progress.days[day] !== today)) {
+      progress.days[day] = today;
+      let completedCount = 0;
+      for (let i = 1; i <= 7; i++) {
+        if (progress.days[i]) completedCount++;
       }
-      const now = audioContext.currentTime;
-      const duration = 2.5;
-      const masterGain = (hangVolumeLevel / 50) * 0.5 * 0.6;
-      const partials = [
-        { freq: frequency, amp: 1.0, decay: 2.5 },
-        { freq: frequency * 1.5, amp: 0.4, decay: 1.8 },
-        { freq: frequency * 2.0, amp: 0.25, decay: 1.2 }
-      ];
-      partials.forEach(p => {
-        const osc = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-        const filter = audioContext.createBiquadFilter();
-        osc.type = 'sine';
-        osc.frequency.value = p.freq;
-        filter.type = 'lowpass';
-        filter.frequency.value = p.freq * 3;
-        filter.Q.value = 0.5;
-        gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(masterGain * p.amp, now + 0.01);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + p.decay);
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(audioContext.destination);
-        osc.start(now);
-        osc.stop(now + duration);
+      progress.completed = (completedCount >= 7);
+      localStorage.setItem('marathon_progress', JSON.stringify(progress));
+      
+      if (progress.completed) {
+        showCompletionModal();
+      } else {
+        showSessionCompletedModal(true);
+      }
+    }
+  }
+
+  function markDayCompleted(durationMs) {
+    if (!endTime || Date.now() - startTime < durationMs - 1000) return;
+    const progress = getMarathonProgress();
+    if (!progress.active) {
+      showSessionCompletedModal(false);
+      return;
+    }
+    const today = new Date().toISOString().split('T')[0];
+    const dayNumber = Math.floor((new Date(today) - new Date(progress.startDate)) / (1000 * 60 * 60 * 24)) + 1;
+    if (dayNumber >= 1 && dayNumber <= 7) {
+      saveMarathonProgress(dayNumber);
+    } else {
+      showSessionCompletedModal(false);
+    }
+  }
+
+  function showSessionCompletedModal(inMarathon) {
+    const modal = document.createElement('div');
+    modal.id = 'session-complete-modal';
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 15, 27, 0.9); display: flex; align-items: center;
+      justify-content: center; z-index: 1000;
+    `;
+    if (inMarathon) {
+      modal.innerHTML = `
+        <div style="background: #16213e; border: 1px solid #4cc9f0; border-radius: 20px; padding: 28px; max-width: 92%; width: 360px; color: #d0d0f5; text-align: center;">
+          <h2 style="font-size: 1.45rem; margin-bottom: 20px; color: #4cc9f0;">🌸 Отлично!</h2>
+          <p style="margin: 16px 0; opacity: 0.9;">Вы завершили дневную практику.<br>Ваш цветок расцвёл!</p>
+          <button id="go-to-marathon" style="width: 100%; max-width: 320px; padding: 12px; font-size: 1.1rem; border: none; border-radius: 24px; background: rgba(22, 33, 62, 0.7); color: #d0d0f5; border: 1px solid #4cc9f0; margin-top: 20px;">К марафону</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      document.getElementById('go-to-marathon').addEventListener('click', () => {
+        modal.remove();
+        showScreen('marathon-screen');
+      });
+    } else {
+      modal.innerHTML = `
+        <div style="background: #16213e; border: 1px solid #4cc9f0; border-radius: 20px; padding: 28px; max-width: 92%; width: 360px; color: #d0d0f5; text-align: center;">
+          <h2 style="font-size: 1.45rem; margin-bottom: 20px; color: #4cc9f0;">🙏 Спасибо!</h2>
+          <p style="margin: 16px 0; opacity: 0.9;">Вы отлично справились!<br>Хотите пройти 7-дневный марафон?</p>
+          <button id="go-to-marathon-offer" style="width: 100%; max-width: 320px; padding: 12px; font-size: 1.1rem; border: none; border-radius: 24px; background: linear-gradient(120deg, #4361ee, #4cc9f0); color: white; margin-top: 20px;">Перейти к марафону</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      document.getElementById('go-to-marathon-offer').addEventListener('click', () => {
+        modal.remove();
+        showScreen('marathon-screen');
       });
     }
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.remove();
+    });
+  }
 
-    function initAudio() {
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      }
+  function showCompletionModal() {
+    const modal = document.createElement('div');
+    modal.id = 'completion-modal';
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 15, 27, 0.9); display: flex; align-items: center;
+      justify-content: center; z-index: 1000;
+    `;
+    modal.innerHTML = `
+      <div style="background: #16213e; border: 1px solid #4cc9f0; border-radius: 20px; padding: 28px; max-width: 92%; width: 360px; color: #d0d0f5; text-align: center;">
+        <h2 style="font-size: 1.45rem; margin-bottom: 20px; color: #4cc9f0;">🌸 Поздравляем!</h2>
+        <p style="margin: 16px 0; opacity: 0.9;">Вы прошли 7 дней практики!<br>Ваше спокойствие — ваша сила.</p>
+        <button id="restart-marathon" style="width: 100%; max-width: 320px; padding: 12px; font-size: 1.1rem; border: none; border-radius: 24px; background: linear-gradient(120deg, #4361ee, #4cc9f0); color: white; margin-top: 20px;">Начать сначала</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('restart-marathon').addEventListener('click', () => {
+      localStorage.removeItem('marathon_progress');
+      document.getElementById('marathon-start-section').classList.remove('hidden');
+      document.getElementById('marathon-grid-container').classList.add('hidden');
+      renderMarathonGrid();
+      modal.remove();
+      showScreen('main-screen');
+    });
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.remove();
+    });
+  }
+
+  function renderMarathonGrid() {
+    const grid = document.getElementById('marathon-grid');
+    grid.innerHTML = '';
+    for (let i = 1; i <= 7; i++) {
+      const dayEl = document.createElement('div');
+      dayEl.className = 'marathon-day';
+      dayEl.textContent = i;
+      grid.appendChild(dayEl);
     }
-
-    function startBackgroundTone(freq) {
-      if (isMuted) return;
-      initAudio();
-      const now = audioContext.currentTime;
-
-      if (currentBackgroundGain) {
-        currentBackgroundGain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
-        if (currentBackgroundOscillator) {
-          currentBackgroundOscillator.stop(now + 1.0);
+    const progress = getMarathonProgress();
+    if (progress.active) {
+      for (let i = 1; i <= 7; i++) {
+        if (progress.days[i]) {
+          const dayEl = grid.children[i - 1];
+          dayEl.textContent = '🌸';
+          dayEl.classList.add('completed');
         }
       }
-
-      const oscillator = audioContext.createOscillator();
-      const merger = audioContext.createChannelMerger(2);
-      const gainNode = audioContext.createGain();
-
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(freq, now);
-
-      oscillator.connect(merger, 0, 0);
-      oscillator.connect(merger, 0, 1);
-      merger.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-
-      gainNode.gain.setValueAtTime(0, now);
-      gainNode.gain.linearRampToValueAtTime(BG_VOLUME * 0.12, now + 1.0);
-
-      oscillator.start(now);
-
-      currentBackgroundOscillator = oscillator;
-      currentBackgroundGain = gainNode;
     }
+  }
 
-    function stopBackgroundTone() {
-      if (currentBackgroundGain) {
-        const now = audioContext.currentTime;
-        currentBackgroundGain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
-        if (currentBackgroundOscillator) {
-          currentBackgroundOscillator.stop(now + 1.0);
-        }
-        currentBackgroundOscillator = null;
-        currentBackgroundGain = null;
+  document.getElementById('start-marathon-btn').addEventListener('click', startMarathon);
+
+  // === МЕДИТАЦИЯ (сокращённо) ===
+  const phaseDuration = 4000;
+  let totalMs = null;
+  let endTime = null;
+  let startTime = null;
+  let timerInterval = null;
+  let phaseInterval = null;
+  let isMuted = false;
+  let isPaused = false;
+  let audioContext = null;
+  let currentPhaseIndex = 0;
+  let selectedDuration = null;
+  let fullChakraCycle = false;
+  let chakraCycleInterval = null;
+  let phaseStartTime = null;
+
+  const BG_VOLUME = 0.05;
+  let hangVolumeLevel = 0.3;
+
+  const sectors = [
+    document.getElementById('segment1'),
+    document.getElementById('segment2'),
+    document.getElementById('segment3'),
+    document.getElementById('segment4')
+  ];
+
+  const hangNotes = [293.7, 349.2, 392.0, 466.2];
+
+  const chakras = [
+    { name: "Муладхара", hz: 174, color: "#ff0000" },
+    { name: "Свадхистхана", hz: 285, color: "#ff8000" },
+    { name: "Манипура", hz: 396, color: "#ffff00" },
+    { name: "Анахата", hz: 417, color: "#00ff00" },
+    { name: "Вишудха", hz: 528, color: "#00ffff" },
+    { name: "Аджна", hz: 639, color: "#0000ff" },
+    { name: "Сахасрара", hz: 741, color: "#8000ff" },
+    { name: "Космос", hz: 852, color: "#00ffff" },
+    { name: "Единство", hz: 963, color: "#ffd700" }
+  ];
+
+  const chakraShortDescriptions = {
+    174: "Естественное обезболивающее средство. Даёт органам чувство безопасности и любви.",
+    285: "Помогает восстанавливать ткани и возвращать их к первоначальному виду.",
+    396: "Освобождает от чувства вины и страха, позволяя начать заново.",
+    417: "Отменяет прошлые травмы и способствует внутренним изменениям.",
+    528: "Частота чуда. Способствует трансформации, ясности ума и восстановлению.",
+    639: "Гармонизирует отношения и раскрывает сердечный центр.",
+    741: "Решает проблемы, очищает от токсинов и расширяет сознание.",
+    852: "Пробуждает интуицию и возвращает к духовному порядку.",
+    963: "Связывает с потоком Света и ощущением единства со Всем."
+  };
+
+  let currentBackgroundOscillator = null;
+  let currentBackgroundGain = null;
+  let currentFrequency = 396;
+
+  function buildChakraSequence() {
+    const up = Array.from({length: 9}, (_, i) => i);
+    const down = Array.from({length: 7}, (_, i) => 7 - i);
+    return [...up, ...down];
+  }
+
+  function playHangSound(frequency) {
+    if (isMuted || typeof window.AudioContext === 'undefined') return;
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    const now = audioContext.currentTime;
+    const duration = 2.5;
+    const masterGain = (hangVolumeLevel / 50) * 0.5 * 0.6;
+    const partials = [
+      { freq: frequency, amp: 1.0, decay: 2.5 },
+      { freq: frequency * 1.5, amp: 0.4, decay: 1.8 },
+      { freq: frequency * 2.0, amp: 0.25, decay: 1.2 }
+    ];
+    partials.forEach(p => {
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      const filter = audioContext.createBiquadFilter();
+      osc.type = 'sine';
+      osc.frequency.value = p.freq;
+      filter.type = 'lowpass';
+      filter.frequency.value = p.freq * 3;
+      filter.Q.value = 0.5;
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(masterGain * p.amp, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + p.decay);
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioContext.destination);
+      osc.start(now);
+      osc.stop(now + duration);
+    });
+  }
+
+  function initAudio() {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+
+  function startBackgroundTone(freq) {
+    if (isMuted) return;
+    initAudio();
+    const now = audioContext.currentTime;
+
+    if (currentBackgroundGain) {
+      currentBackgroundGain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
+      if (currentBackgroundOscillator) {
+        currentBackgroundOscillator.stop(now + 1.0);
       }
     }
 
-    function animateBreathCircle() {
-      if (!phaseStartTime || isPaused) return;
+    const oscillator = audioContext.createOscillator();
+    const merger = audioContext.createChannelMerger(2);
+    const gainNode = audioContext.createGain();
 
-      const now = Date.now();
-      const elapsed = now - phaseStartTime;
-      const progress = (elapsed % phaseDuration) / phaseDuration;
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(freq, now);
 
-      sectors.forEach(s => {
-        s.classList.remove('active');
-        s.style.background = '';
-      });
+    oscillator.connect(merger, 0, 0);
+    oscillator.connect(merger, 0, 1);
+    merger.connect(gainNode);
+    gainNode.connect(audioContext.destination);
 
-      const currentSector = sectors[currentPhaseIndex];
-      currentSector.classList.add('active');
+    gainNode.gain.setValueAtTime(0, now);
+    gainNode.gain.linearRampToValueAtTime(BG_VOLUME * 0.12, now + 1.0);
 
-      const baseHue = 200 + 240 * (currentPhaseIndex / 4);
-      const hue = baseHue + 30 * Math.sin(progress * Math.PI);
-      const lightness = 45 + 25 * Math.sin(progress * Math.PI);
-      const saturation = 80 + 20 * Math.sin(progress * Math.PI);
-      currentSector.style.background = `linear-gradient(135deg, hsl(${hue}, ${saturation}%, ${lightness}%), hsl(${hue - 30}, ${saturation}%, ${lightness - 10}%))`;
+    oscillator.start(now);
 
-      requestAnimationFrame(animateBreathCircle);
+    currentBackgroundOscillator = oscillator;
+    currentBackgroundGain = gainNode;
+  }
+
+  function stopBackgroundTone() {
+    if (currentBackgroundGain) {
+      const now = audioContext.currentTime;
+      currentBackgroundGain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
+      if (currentBackgroundOscillator) {
+        currentBackgroundOscillator.stop(now + 1.0);
+      }
+      currentBackgroundOscillator = null;
+      currentBackgroundGain = null;
     }
+  }
 
-    function startSession(durationMs) {
-      stopSession();
-      sectors.forEach(s => {
-        s.classList.remove('active');
-        s.style.background = '';
-      });
-      document.getElementById('message').classList.remove('show');
+  function animateBreathCircle() {
+    if (!phaseStartTime || isPaused) return;
 
-      totalMs = durationMs;
-      startTime = Date.now();
+    const now = Date.now();
+    const elapsed = now - phaseStartTime;
+    const progress = (elapsed % phaseDuration) / phaseDuration;
+
+    sectors.forEach(s => {
+      s.classList.remove('active');
+      s.style.background = '';
+    });
+
+    const currentSector = sectors[currentPhaseIndex];
+    currentSector.classList.add('active');
+
+    const baseHue = 200 + 240 * (currentPhaseIndex / 4);
+    const hue = baseHue + 30 * Math.sin(progress * Math.PI);
+    const lightness = 45 + 25 * Math.sin(progress * Math.PI);
+    const saturation = 80 + 20 * Math.sin(progress * Math.PI);
+    currentSector.style.background = `linear-gradient(135deg, hsl(${hue}, ${saturation}%, ${lightness}%), hsl(${hue - 30}, ${saturation}%, ${lightness - 10}%))`;
+
+    requestAnimationFrame(animateBreathCircle);
+  }
+
+  function startSession(durationMs) {
+    stopSession();
+    sectors.forEach(s => {
+      s.classList.remove('active');
+      s.style.background = '';
+    });
+    document.getElementById('message').classList.remove('show');
+
+    totalMs = durationMs;
+    startTime = Date.now();
+    endTime = startTime + totalMs;
+    isPaused = false;
+    currentPhaseIndex = 0;
+    phaseStartTime = Date.now();
+
+    playHangSound(hangNotes[currentPhaseIndex]);
+    if (!isMuted) startBackgroundTone(currentFrequency);
+
+    phaseInterval = setInterval(() => {
+      if (isPaused) return;
+      currentPhaseIndex = (currentPhaseIndex + 1) % 4;
+      playHangSound(hangNotes[currentPhaseIndex]);
+    }, phaseDuration);
+
+    animateBreathCircle();
+
+    timerInterval = setInterval(updateTimer, 250);
+    updateTimer();
+
+    document.getElementById('pause-btn').textContent = '⏸ Пауза';
+    document.getElementById('mute-btn').textContent = isMuted ? '🔈 Со звуком' : '🔇 Без звука';
+  }
+
+  function pauseResumeSession() {
+    if (!endTime) return;
+    if (isPaused) {
+      startTime = Date.now() - (totalMs - (endTime - Date.now()));
       endTime = startTime + totalMs;
       isPaused = false;
-      currentPhaseIndex = 0;
-      phaseStartTime = Date.now();
-
-      playHangSound(hangNotes[currentPhaseIndex]);
-      if (!isMuted) startBackgroundTone(currentFrequency);
-
-      phaseInterval = setInterval(() => {
-        if (isPaused) return;
-        currentPhaseIndex = (currentPhaseIndex + 1) % 4;
-        playHangSound(hangNotes[currentPhaseIndex]);
-      }, phaseDuration);
-
-      animateBreathCircle();
-
-      timerInterval = setInterval(updateTimer, 250);
-      updateTimer();
-
-      document.getElementById('pause-btn').textContent = '⏸ Пауза';
-      document.getElementById('mute-btn').textContent = isMuted ? '🔈 Со звуком' : '🔇 Без звука';
-    }
-
-    function pauseResumeSession() {
-      if (!endTime) return;
-      if (isPaused) {
-        startTime = Date.now() - (totalMs - (endTime - Date.now()));
-        endTime = startTime + totalMs;
-        isPaused = false;
-        phaseStartTime = Date.now() - (Date.now() - startTime) % phaseDuration;
-        if (!isMuted) {
-          if (fullChakraCycle) startChakraCycle(totalMs);
-          else startBackgroundTone(currentFrequency);
-        }
-        animateBreathCircle();
-        document.getElementById('pause-btn').textContent = '⏸ Пауза';
-      } else {
-        isPaused = true;
-        stopBackgroundTone();
-        stopChakraCycle();
-        document.getElementById('pause-btn').textContent = '▶ Возобновить';
+      phaseStartTime = Date.now() - (Date.now() - startTime) % phaseDuration;
+      if (!isMuted) {
+        if (fullChakraCycle) startChakraCycle(totalMs);
+        else startBackgroundTone(currentFrequency);
       }
-    }
-
-    function stopSession() {
-      if (timerInterval) clearInterval(timerInterval);
-      if (phaseInterval) clearInterval(phaseInterval);
-      timerInterval = null;
-      phaseInterval = null;
-      phaseStartTime = null;
-      endTime = null;
-      isPaused = false;
+      animateBreathCircle();
+      document.getElementById('pause-btn').textContent = '⏸ Пауза';
+    } else {
+      isPaused = true;
       stopBackgroundTone();
       stopChakraCycle();
+      document.getElementById('pause-btn').textContent = '▶ Возобновить';
     }
+  }
 
-    function startChakraCycle(totalMs) {
-      if (!fullChakraCycle) return;
-      stopChakraCycle();
-      const sequence = buildChakraSequence();
-      const stepMs = totalMs / sequence.length;
-      let stepIndex = 0;
+  function stopSession() {
+    if (timerInterval) clearInterval(timerInterval);
+    if (phaseInterval) clearInterval(phaseInterval);
+    timerInterval = null;
+    phaseInterval = null;
+    phaseStartTime = null;
+    endTime = null;
+    isPaused = false;
+    stopBackgroundTone();
+    stopChakraCycle();
+    
+    if (location.hash === '#meditation' && selectedDuration) {
+      markDayCompleted(selectedDuration);
+    }
+  }
+
+  function startChakraCycle(totalMs) {
+    if (!fullChakraCycle) return;
+    stopChakraCycle();
+    const sequence = buildChakraSequence();
+    const stepMs = totalMs / sequence.length;
+    let stepIndex = 0;
+    currentFrequency = chakras[sequence[stepIndex]].hz;
+    if (!isMuted) startBackgroundTone(currentFrequency);
+    chakraCycleInterval = setInterval(() => {
+      if (isPaused) return;
+      stepIndex = (stepIndex + 1) % sequence.length;
       currentFrequency = chakras[sequence[stepIndex]].hz;
       if (!isMuted) startBackgroundTone(currentFrequency);
-      chakraCycleInterval = setInterval(() => {
-        if (isPaused) return;
-        stepIndex = (stepIndex + 1) % sequence.length;
-        currentFrequency = chakras[sequence[stepIndex]].hz;
-        if (!isMuted) startBackgroundTone(currentFrequency);
-      }, stepMs);
+    }, stepMs);
+  }
+
+  function stopChakraCycle() {
+    if (chakraCycleInterval) {
+      clearInterval(chakraCycleInterval);
+      chakraCycleInterval = null;
     }
+  }
 
-    function stopChakraCycle() {
-      if (chakraCycleInterval) {
-        clearInterval(chakraCycleInterval);
-        chakraCycleInterval = null;
-      }
-    }
+  const chakraList = document.getElementById('chakra-list');
+  const breathVolumeSlider = document.getElementById('breath-volume');
+  const fullChakraCheckbox = document.getElementById('full-chakra-cycle');
 
-    const helpModal = document.getElementById('help-modal');
-    const settingsModal = document.getElementById('settings-modal');
-    const chakraList = document.getElementById('chakra-list');
-    const breathVolumeSlider = document.getElementById('breath-volume');
-    const fullChakraCheckbox = document.getElementById('full-chakra-cycle');
+  chakras.forEach((chakra, index) => {
+    const row = document.createElement('div');
+    row.className = 'chakra-row';
 
-    chakras.forEach((chakra, index) => {
-      const row = document.createElement('div');
-      row.className = 'chakra-row';
+    const textDiv = document.createElement('div');
+    textDiv.className = 'chakra-text';
+    textDiv.innerHTML = `
+      <div class="chakra-name">${chakra.name}</div>
+      <div class="chakra-hz">${chakra.hz} Гц</div>
+      <div class="chakra-desc">${chakraShortDescriptions[chakra.hz]}</div>
+    `;
 
-      const textDiv = document.createElement('div');
-      textDiv.className = 'chakra-text';
-      textDiv.innerHTML = `
-        <div class="chakra-name">${chakra.name}</div>
-        <div class="chakra-hz">${chakra.hz} Гц</div>
-        <div class="chakra-desc">${chakraShortDescriptions[chakra.hz]}</div>
-      `;
+    const circle = document.createElement('div');
+    circle.className = 'chakra-circle';
+    circle.dataset.hz = chakra.hz;
+    circle.style.backgroundColor = chakra.color;
+    if (chakra.hz === currentFrequency) circle.classList.add('active');
 
-      const circle = document.createElement('div');
-      circle.className = 'chakra-circle';
-      circle.dataset.hz = chakra.hz;
-      circle.style.backgroundColor = chakra.color;
-      if (chakra.hz === currentFrequency) circle.classList.add('active');
-
-      circle.addEventListener('click', () => {
-        if (fullChakraCheckbox.checked) {
-          showMessage("Отключите «Полный цикл», чтобы выбрать частоту");
-          return;
-        }
-        document.querySelectorAll('.chakra-circle').forEach(c => c.classList.remove('active'));
-        circle.classList.add('active');
-        currentFrequency = chakra.hz;
-        if (!isPaused && endTime && !isMuted) {
-          startBackgroundTone(currentFrequency);
-        }
-      });
-
-      row.appendChild(textDiv);
-      row.appendChild(circle);
-      chakraList.appendChild(row);
-    });
-
-    fullChakraCheckbox.addEventListener('change', () => {
-      fullChakraCycle = fullChakraCheckbox.checked;
-      if (fullChakraCycle) {
-        document.querySelectorAll('.chakra-circle').forEach(c => c.classList.remove('active'));
-      }
-    });
-
-    breathVolumeSlider.addEventListener('input', () => {
-      hangVolumeLevel = parseFloat(breathVolumeSlider.value);
-    });
-
-    function openModal(modal) {
-      modal.classList.add('show');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeModal(modal) {
-      modal.classList.remove('show');
-      document.body.style.overflow = '';
-    }
-
-    document.getElementById('help-btn').addEventListener('click', () => openModal(helpModal));
-    document.getElementById('help-close').addEventListener('click', () => closeModal(helpModal));
-    helpModal.addEventListener('click', (e) => { if (e.target === helpModal) closeModal(helpModal); });
-
-    document.getElementById('settings-btn').addEventListener('click', () => openModal(settingsModal));
-    document.getElementById('settings-close').addEventListener('click', () => closeModal(settingsModal));
-    settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) closeModal(settingsModal); });
-
-    const durationControls = document.getElementById('duration-controls');
-    const playBtn = document.getElementById('play-btn');
-    const sessionControls = document.getElementById('session-controls');
-
-    function updateTimer() {
-      if (isPaused) return;
-      const now = Date.now();
-      let remaining = endTime - now;
-      if (remaining <= 0) {
-        remaining = 0;
-        stopSession();
-        showMessage("Практика завершена. Спасибо за заботу о себе.");
-        setTimeout(resetToStart, 3000);
+    circle.addEventListener('click', () => {
+      if (fullChakraCheckbox.checked) {
+        showMessage("Отключите «Полный цикл», чтобы выбрать частоту");
         return;
       }
-      const mins = Math.floor(remaining / 60000);
-      const secs = Math.floor((remaining % 60000) / 1000);
-      document.getElementById('timer').textContent = 
-        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
+      document.querySelectorAll('.chakra-circle').forEach(c => c.classList.remove('active'));
+      circle.classList.add('active');
+      currentFrequency = chakra.hz;
+      if (!isPaused && endTime && !isMuted) {
+        startBackgroundTone(currentFrequency);
+      }
+    });
 
-    function showMessage(text) {
-      const el = document.getElementById('message');
-      el.textContent = text;
-      el.classList.add('show');
-    }
+    row.appendChild(textDiv);
+    row.appendChild(circle);
+    chakraList.appendChild(row);
+  });
 
-    function resetToStart() {
+  fullChakraCheckbox.addEventListener('change', () => {
+    fullChakraCycle = fullChakraCheckbox.checked;
+    if (fullChakraCycle) {
+      document.querySelectorAll('.chakra-circle').forEach(c => c.classList.remove('active'));
+    }
+  });
+
+  breathVolumeSlider.addEventListener('input', () => {
+    hangVolumeLevel = parseFloat(breathVolumeSlider.value);
+  });
+
+  function showMessage(text) {
+    const el = document.getElementById('message');
+    el.textContent = text;
+    el.classList.add('show');
+  }
+
+  function resetToStart() {
+    stopSession();
+    document.getElementById('timer').textContent = '00:00';
+    document.getElementById('message').classList.remove('show');
+    durationControls.classList.remove('hidden');
+    playBtn.classList.add('hidden');
+    sessionControls.classList.add('hidden');
+    document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
+    selectedDuration = null;
+  }
+
+  const durationControls = document.getElementById('duration-controls');
+  const playBtn = document.getElementById('play-btn');
+  const sessionControls = document.getElementById('session-controls');
+
+  function updateTimer() {
+    if (isPaused) return;
+    const now = Date.now();
+    let remaining = endTime - now;
+    if (remaining <= 0) {
+      remaining = 0;
       stopSession();
-      document.getElementById('timer').textContent = '00:00';
-      document.getElementById('message').classList.remove('show');
-      durationControls.classList.remove('hidden');
-      playBtn.classList.add('hidden');
-      sessionControls.classList.add('hidden');
+      showMessage("Практика завершена. Спасибо за заботу о себе.");
+      setTimeout(resetToStart, 3000);
+      return;
+    }
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+    document.getElementById('timer').textContent = 
+      `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  document.querySelectorAll('#duration-controls button').forEach(btn => {
+    btn.addEventListener('click', () => {
       document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
-      selectedDuration = null;
+      btn.classList.add('active');
+      selectedDuration = parseInt(btn.dataset.mins) * 60 * 1000;
+      playBtn.classList.remove('hidden');
+      playBtn.style.display = 'inline-block';
+    });
+  });
+
+  playBtn.addEventListener('click', () => {
+    if (selectedDuration) {
+      startSession(selectedDuration);
+      durationControls.classList.add('hidden');
+      playBtn.classList.add('hidden');
+      sessionControls.classList.remove('hidden');
     }
+  });
 
-    document.querySelectorAll('#duration-controls button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedDuration = parseInt(btn.dataset.mins) * 60 * 1000;
-        playBtn.classList.remove('hidden');
-        playBtn.style.display = 'inline-block';
-      });
-    });
-
-    playBtn.addEventListener('click', () => {
-      if (selectedDuration) {
-        startSession(selectedDuration);
-        durationControls.classList.add('hidden');
-        playBtn.classList.add('hidden');
-        sessionControls.classList.remove('hidden');
+  document.getElementById('pause-btn').addEventListener('click', pauseResumeSession);
+  document.getElementById('stop-btn').addEventListener('click', resetToStart);
+  document.getElementById('mute-btn').addEventListener('click', () => {
+    isMuted = !isMuted;
+    if (isMuted) {
+      stopBackgroundTone();
+      document.getElementById('mute-btn').textContent = '🔈 Со звуком';
+    } else {
+      if (fullChakraCycle) {
+        startChakraCycle(totalMs);
+      } else if (!isPaused && endTime) {
+        startBackgroundTone(currentFrequency);
       }
-    });
-
-    document.getElementById('pause-btn').addEventListener('click', pauseResumeSession);
-    document.getElementById('stop-btn').addEventListener('click', resetToStart);
-    document.getElementById('mute-btn').addEventListener('click', () => {
-      isMuted = !isMuted;
-      if (isMuted) {
-        stopBackgroundTone();
-        document.getElementById('mute-btn').textContent = '🔈 Со звуком';
-      } else {
-        if (fullChakraCycle) {
-          startChakraCycle(totalMs);
-        } else if (!isPaused && endTime) {
-          startBackgroundTone(currentFrequency);
-        }
-        document.getElementById('mute-btn').textContent = '🔇 Без звука';
-      }
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (helpModal.classList.contains('show')) closeModal(helpModal);
-        if (settingsModal.classList.contains('show')) closeModal(settingsModal);
-      }
-    });
-
-    document.querySelector('.chakra-circle').classList.add('active');
-  </script>
-
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
-      });
+      document.getElementById('mute-btn').textContent = '🔇 Без звука';
     }
-  </script>
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      showScreen('main-screen');
+    }
+  });
+
+  document.querySelector('.chakra-circle').classList.add('active');
+
+  // Инициализация
+  renderMarathonGrid();
+  const initialHash = location.hash.replace('#', '');
+  if (initialHash === 'meditation') showScreen('meditation-screen');
+  else if (initialHash === 'marathon') showScreen('marathon-screen');
+  else if (initialHash === 'help') showScreen('help-screen');
+  else if (initialHash === 'settings') showScreen('settings-screen');
+  else showScreen('main-screen');
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
 </body>
 </html>
