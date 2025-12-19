@@ -403,9 +403,6 @@
 
   <div id="marathon-grid-container" class="hidden">
     <div id="marathon-grid" class="marathon-grid"></div>
-    <button id="reset-marathon-from-marathon" class="main-btn secondary" style="margin-top: 24px;">
-      Начать марафон заново
-    </button>
   </div>
 </div>
 
@@ -469,7 +466,7 @@
   <h3 style="margin: 22px 0 14px; color: #a9a9d6;">Частоты чакр:</h3>
   <div id="chakra-list"></div>
 
-  <button id="reset-marathon-btn" class="main-btn secondary" style="margin-top: 16px;">
+  <button id="reset-marathon-btn" style="margin-top: 12px; padding: 6px 14px; font-size: 0.85rem; background: transparent; border: 1px solid #4cc9f0; color: #a9a9d6; border-radius: 16px; cursor: pointer;">
     Начать марафон заново
   </button>
 </div>
@@ -496,7 +493,10 @@
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     if (screenId === 'main-screen') document.getElementById('nav-main').classList.add('active');
     else if (screenId === 'meditation-screen') document.getElementById('nav-meditation').classList.add('active');
-    else if (screenId === 'marathon-screen') document.getElementById('nav-marathon').classList.add('active');
+    else if (screenId === 'marathon-screen') {
+      document.getElementById('nav-marathon').classList.add('active');
+      updateMarathonScreen();
+    }
     else if (screenId === 'help-screen') document.getElementById('nav-help').classList.add('active');
     else if (screenId === 'settings-screen') {
       document.getElementById('nav-settings').classList.add('active');
@@ -597,6 +597,7 @@
       dayEl.textContent = i;
       grid.appendChild(dayEl);
     }
+    
     const progress = getMarathonProgress();
     if (progress.active) {
       for (let i = 1; i <= 8; i++) {
@@ -609,27 +610,36 @@
     }
   }
 
+  function updateMarathonScreen() {
+    const progress = getMarathonProgress();
+    if (progress.active) {
+      document.getElementById('marathon-start-section').classList.add('hidden');
+      document.getElementById('marathon-grid-container').classList.remove('hidden');
+    } else {
+      document.getElementById('marathon-start-section').classList.remove('hidden');
+      document.getElementById('marathon-grid-container').classList.add('hidden');
+    }
+    renderMarathonGrid();
+  }
+
   document.getElementById('start-marathon-btn').addEventListener('click', startMarathon);
 
-  // === СБРОС МАРАФОНА (из Настроек) ===
-  document.getElementById('reset-marathon-btn').addEventListener('click', () => {
-    if (confirm('Сбросить прогресс марафона?')) {
-      localStorage.removeItem('marathon_progress');
-      renderMarathonGrid();
-      showMessage("Прогресс марафона сброшен.");
-    }
-  });
-
-  // === СБРОС МАРАФОНА (из Марафона) ===
-  document.getElementById('reset-marathon-from-marathon').addEventListener('click', () => {
-    if (confirm('Сбросить прогресс марафона? Все 8 дней будут сброшены.')) {
-      localStorage.removeItem('marathon_progress');
+  // === СБРОС МАРАФОНА (только из Настроек, без подтверждения) ===
+  function resetMarathon() {
+    localStorage.removeItem('marathon_progress');
+    
+    // Обновляем вид страницы Марафона, если она сейчас открыта
+    const progress = getMarathonProgress();
+    if (!progress.active) {
       document.getElementById('marathon-start-section').classList.remove('hidden');
       document.getElementById('marathon-grid-container').classList.add('hidden');
       renderMarathonGrid();
-      showMessage("Марафон сброшен. Начните заново!");
     }
-  });
+    
+    showMessage("Марафон сброшен. Начните заново в любое время.");
+  }
+
+  document.getElementById('reset-marathon-btn').addEventListener('click', resetMarathon);
 
   // === МЕДИТАЦИЯ ===
   const phaseDuration = 4000;
@@ -1055,7 +1065,6 @@
 
   // Инициализация
   renderChakraList();
-  renderMarathonGrid();
   const initialHash = location.hash.replace('#', '');
   if (initialHash === 'meditation') showScreen('meditation-screen');
   else if (initialHash === 'marathon') showScreen('marathon-screen');
