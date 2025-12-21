@@ -33,7 +33,7 @@
     .screen {
       width: 100%;
       max-width: 520px;
-      padding: 24px 12px 90px; /* отступ под фиксированное меню */
+      padding: 24px 12px 90px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -211,6 +211,32 @@
       display: none;
     }
 
+    .volume-control {
+      margin: 24px 0;
+      width: 100%;
+    }
+    .volume-control label {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 1.05rem;
+    }
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      background: #2a2a4a;
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #4cc9f0;
+      cursor: pointer;
+    }
+
     /* === Марафон === */
     .marathon-description {
       font-size: 1.05rem;
@@ -251,31 +277,6 @@
       font-size: 2.2rem;
       border-color: transparent;
       box-shadow: 0 0 12px rgba(76, 201, 240, 0.5);
-    }
-
-    .volume-control {
-      margin: 24px 0;
-    }
-    .volume-control label {
-      display: block;
-      margin-bottom: 12px;
-      font-size: 1.05rem;
-    }
-    input[type="range"] {
-      width: 100%;
-      height: 6px;
-      background: #2a2a4a;
-      border-radius: 3px;
-      outline: none;
-      -webkit-appearance: none;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #4cc9f0;
-      cursor: pointer;
     }
 
     #chakra-list {
@@ -337,7 +338,6 @@
       text-align: left;
     }
 
-    /* === Кнопка сброса марафона === */
     .reset-btn {
       margin-top: 12px;
       padding: 6px 14px;
@@ -376,6 +376,11 @@
     <div class="center-dot"></div>
   </div>
   <div id="timer">00:00</div>
+
+  <div class="volume-control" style="margin: 16px 0; width: 80%;">
+    <label for="meditation-volume">Громкость</label>
+    <input type="range" id="meditation-volume" min="0" max="50" value="30">
+  </div>
 
   <div class="section-title">Выбери время медитации</div>
   <div id="duration-controls" class="controls">
@@ -506,7 +511,8 @@
 
   // === НАВИГАЦИЯ ===
   function showScreen(screenId) {
-    if (location.hash === '#meditation' && screenId !== 'meditation-screen') {
+    // Останавливаем ТОЛЬКО при переходе на Главную
+    if (location.hash === '#meditation' && screenId === 'main-screen') {
       stopSessionWithoutSaving();
     }
 
@@ -515,7 +521,15 @@
     
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     if (screenId === 'main-screen') document.getElementById('nav-main').classList.add('active');
-    else if (screenId === 'meditation-screen') document.getElementById('nav-meditation').classList.add('active');
+    else if (screenId === 'meditation-screen') {
+      document.getElementById('nav-meditation').classList.add('active');
+      // Синхронизируем ползунок
+      document.getElementById('meditation-volume').value = hangVolumeLevel;
+      // Показываем управление, если сессия активна
+      if (endTime || selectedDuration) {
+        document.getElementById('session-controls').classList.remove('hidden');
+      }
+    }
     else if (screenId === 'marathon-screen') {
       document.getElementById('nav-marathon').classList.add('active');
       updateMarathonScreen();
@@ -524,6 +538,7 @@
     else if (screenId === 'settings-screen') {
       document.getElementById('nav-settings').classList.add('active');
       renderChakraList();
+      document.getElementById('breath-volume').value = hangVolumeLevel;
     }
     
     history.pushState(null, '', `#${screenId.replace('-screen', '')}`);
@@ -545,6 +560,25 @@
     else if (hash === 'help') showScreen('help-screen');
     else if (hash === 'settings') showScreen('settings-screen');
     else showScreen('main-screen');
+  });
+
+  // === ОБЩИЙ УПРАВЛЕНИЕ ГРОМКОСТЬЮ ===
+  function updateVolume(value) {
+    hangVolumeLevel = parseFloat(value);
+    if (audioContext && !isMuted && currentBackgroundGain) {
+      const vol = (Math.pow(hangVolumeLevel / 50, 2) * 0.5 * 0.6) * 0.1;
+      currentBackgroundGain.gain.setValueAtTime(vol, audioContext.currentTime);
+    }
+  }
+
+  document.getElementById('breath-volume').addEventListener('input', (e) => {
+    updateVolume(e.target.value);
+    document.getElementById('meditation-volume').value = e.target.value;
+  });
+
+  document.getElementById('meditation-volume').addEventListener('input', (e) => {
+    updateVolume(e.target.value);
+    document.getElementById('breath-volume').value = e.target.value;
   });
 
   // === МАРАФОН (8 дней) ===
@@ -650,7 +684,6 @@
   // === СБРОС МАРАФОНА ===
   function resetMarathon() {
     localStorage.removeItem('marathon_progress');
-    
     const progress = getMarathonProgress();
     if (!progress.active) {
       const startSection = document.getElementById('marathon-start-section');
@@ -661,7 +694,6 @@
         renderMarathonGrid();
       }
     }
-    
     const notify = document.createElement('div');
     notify.textContent = "Марафон сброшен. Начните заново в любое время.";
     notify.style.cssText = `
@@ -679,7 +711,6 @@
       animation: fadeShow 0.3s forwards, fadeHide 0.3s forwards 2.7s;
     `;
     document.body.appendChild(notify);
-    
     setTimeout(() => {
       if (notify.parentNode) notify.parentNode.removeChild(notify);
     }, 3000);
@@ -756,7 +787,7 @@
     }
     const now = audioContext.currentTime;
     const duration = 2.5;
-    const masterGain = (getHangVolumeLevel() / 50) * 0.5 * 0.6;
+    const masterGain = (Math.pow(hangVolumeLevel / 50, 2) * 0.5 * 0.6);
     const partials = [
       { freq: frequency, amp: 1.0, decay: 2.5 },
       { freq: frequency * 1.5, amp: 0.4, decay: 1.8 },
@@ -780,10 +811,6 @@
       osc.start(now);
       osc.stop(now + duration);
     });
-  }
-
-  function getHangVolumeLevel() {
-    return Math.pow(hangVolumeLevel / 50, 2) * 50;
   }
 
   function initAudio() {
@@ -967,12 +994,7 @@
   }
 
   // === ЧАКРЫ ===
-  const breathVolumeSlider = document.getElementById('breath-volume');
   const fullChakraCheckbox = document.getElementById('full-chakra-cycle');
-
-  breathVolumeSlider.addEventListener('input', () => {
-    hangVolumeLevel = parseFloat(breathVolumeSlider.value);
-  });
 
   fullChakraCheckbox.addEventListener('change', () => {
     fullChakraCycle = fullChakraCheckbox.checked;
