@@ -511,7 +511,6 @@
 
   // === НАВИГАЦИЯ ===
   function showScreen(screenId) {
-    // Останавливаем ТОЛЬКО при переходе на Главную
     if (location.hash === '#meditation' && screenId === 'main-screen') {
       stopSessionWithoutSaving();
     }
@@ -523,9 +522,7 @@
     if (screenId === 'main-screen') document.getElementById('nav-main').classList.add('active');
     else if (screenId === 'meditation-screen') {
       document.getElementById('nav-meditation').classList.add('active');
-      // Синхронизируем ползунок
       document.getElementById('meditation-volume').value = hangVolumeLevel;
-      // Показываем управление, если сессия активна
       if (endTime || selectedDuration) {
         document.getElementById('session-controls').classList.remove('hidden');
       }
@@ -562,7 +559,7 @@
     else showScreen('main-screen');
   });
 
-  // === ОБЩИЙ УПРАВЛЕНИЕ ГРОМКОСТЬЮ ===
+  // === ГРОМКОСТЬ ===
   function updateVolume(value) {
     hangVolumeLevel = parseFloat(value);
     if (audioContext && !isMuted && currentBackgroundGain) {
@@ -581,7 +578,7 @@
     document.getElementById('breath-volume').value = e.target.value;
   });
 
-  // === МАРАФОН (8 дней) ===
+  // === МАРАФОН ===
   function getMarathonProgress() {
     const data = localStorage.getItem('marathon_progress');
     return data ? JSON.parse(data) : { 
@@ -681,7 +678,6 @@
 
   document.getElementById('start-marathon-btn').addEventListener('click', startMarathon);
 
-  // === СБРОС МАРАФОНА ===
   function resetMarathon() {
     localStorage.removeItem('marathon_progress');
     const progress = getMarathonProgress();
@@ -904,7 +900,15 @@
     selectedDuration = durationMs;
 
     playHangSound(hangNotes[currentPhaseIndex]);
-    if (!isMuted) startBackgroundTone(currentFrequency);
+    
+    // ✅ КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: проверка fullChakraCycle
+    if (!isMuted) {
+      if (fullChakraCycle) {
+        startChakraCycle(totalMs);
+      } else {
+        startBackgroundTone(currentFrequency);
+      }
+    }
 
     phaseInterval = setInterval(() => {
       if (isPaused) return;
@@ -929,8 +933,11 @@
       isPaused = false;
       phaseStartTime = Date.now() - (Date.now() - startTime) % phaseDuration;
       if (!isMuted) {
-        if (fullChakraCycle) startChakraCycle(totalMs);
-        else startBackgroundTone(currentFrequency);
+        if (fullChakraCycle) {
+          startChakraCycle(totalMs);
+        } else {
+          startBackgroundTone(currentFrequency);
+        }
       }
       animateBreathCircle();
       document.getElementById('pause-btn').textContent = '⏸ Пауза';
@@ -998,8 +1005,20 @@
 
   fullChakraCheckbox.addEventListener('change', () => {
     fullChakraCycle = fullChakraCheckbox.checked;
+    
     if (fullChakraCycle) {
       document.querySelectorAll('.chakra-circle').forEach(c => c.classList.remove('active'));
+    }
+    
+    // ✅ КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: применение в реальном времени
+    if (endTime && !isPaused && !isMuted) {
+      stopChakraCycle();
+      stopBackgroundTone();
+      if (fullChakraCycle) {
+        startChakraCycle(totalMs);
+      } else {
+        startBackgroundTone(currentFrequency);
+      }
     }
   });
 
@@ -1077,7 +1096,6 @@
   const playBtn = document.getElementById('play-btn');
   const sessionControls = document.getElementById('session-controls');
 
-  // === ВЫБОР ВРЕМЕНИ ===
   document.querySelectorAll('#duration-controls button').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('#duration-controls button').forEach(b => {
