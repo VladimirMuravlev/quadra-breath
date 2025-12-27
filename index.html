@@ -395,7 +395,6 @@
   <div id="session-controls" class="controls hidden" style="margin-top: 16px;">
     <button id="pause-btn">⏸ Пауза</button>
     <button id="stop-btn">⏹ Стоп</button>
-    <button id="mute-btn">🔇 Без звука</button>
   </div>
 </div>
 
@@ -523,8 +522,12 @@
     else if (screenId === 'meditation-screen') {
       document.getElementById('nav-meditation').classList.add('active');
       document.getElementById('meditation-volume').value = hangVolumeLevel;
-      if (endTime || selectedDuration) {
+      
+      // ✅ ИСПРАВЛЕНИЕ: кнопки только при активной сессии
+      if (endTime && !isPaused) {
         document.getElementById('session-controls').classList.remove('hidden');
+      } else {
+        document.getElementById('session-controls').classList.add('hidden');
       }
     }
     else if (screenId === 'marathon-screen') {
@@ -562,7 +565,7 @@
   // === ГРОМКОСТЬ ===
   function updateVolume(value) {
     hangVolumeLevel = parseFloat(value);
-    if (audioContext && !isMuted && currentBackgroundGain) {
+    if (audioContext && currentBackgroundGain) {
       const vol = (Math.pow(hangVolumeLevel / 50, 2) * 0.5 * 0.6) * 0.1;
       currentBackgroundGain.gain.setValueAtTime(vol, audioContext.currentTime);
     }
@@ -721,7 +724,6 @@
   let startTime = null;
   let timerInterval = null;
   let phaseInterval = null;
-  let isMuted = false;
   let isPaused = false;
   let audioContext = null;
   let currentPhaseIndex = 0;
@@ -777,7 +779,7 @@
   }
 
   function playHangSound(frequency) {
-    if (isMuted || typeof window.AudioContext === 'undefined') return;
+    if (typeof window.AudioContext === 'undefined') return;
     if (!audioContext) {
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
@@ -816,7 +818,6 @@
   }
 
   function startBackgroundTone(freq) {
-    if (isMuted) return;
     initAudio();
     const now = audioContext.currentTime;
 
@@ -901,13 +902,11 @@
 
     playHangSound(hangNotes[currentPhaseIndex]);
     
-    // ✅ КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: проверка fullChakraCycle
-    if (!isMuted) {
-      if (fullChakraCycle) {
-        startChakraCycle(totalMs);
-      } else {
-        startBackgroundTone(currentFrequency);
-      }
+    // ✅ Звук всегда включён
+    if (fullChakraCycle) {
+      startChakraCycle(totalMs);
+    } else {
+      startBackgroundTone(currentFrequency);
     }
 
     phaseInterval = setInterval(() => {
@@ -922,7 +921,6 @@
     updateTimer();
 
     document.getElementById('pause-btn').textContent = '⏸ Пауза';
-    document.getElementById('mute-btn').textContent = isMuted ? '🔈 Со звуком' : '🔇 Без звука';
   }
 
   function pauseResumeSession() {
@@ -932,13 +930,13 @@
       endTime = startTime + totalMs;
       isPaused = false;
       phaseStartTime = Date.now() - (Date.now() - startTime) % phaseDuration;
-      if (!isMuted) {
-        if (fullChakraCycle) {
-          startChakraCycle(totalMs);
-        } else {
-          startBackgroundTone(currentFrequency);
-        }
+      
+      if (fullChakraCycle) {
+        startChakraCycle(totalMs);
+      } else {
+        startBackgroundTone(currentFrequency);
       }
+      
       animateBreathCircle();
       document.getElementById('pause-btn').textContent = '⏸ Пауза';
     } else {
@@ -984,12 +982,12 @@
     const stepMs = totalMs / sequence.length;
     let stepIndex = 0;
     currentFrequency = chakras[sequence[stepIndex]].hz;
-    if (!isMuted) startBackgroundTone(currentFrequency);
+    startBackgroundTone(currentFrequency);
     chakraCycleInterval = setInterval(() => {
       if (isPaused) return;
       stepIndex = (stepIndex + 1) % sequence.length;
       currentFrequency = chakras[sequence[stepIndex]].hz;
-      if (!isMuted) startBackgroundTone(currentFrequency);
+      startBackgroundTone(currentFrequency);
     }, stepMs);
   }
 
@@ -1010,8 +1008,8 @@
       document.querySelectorAll('.chakra-circle').forEach(c => c.classList.remove('active'));
     }
     
-    // ✅ КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: применение в реальном времени
-    if (endTime && !isPaused && !isMuted) {
+    // ✅ Применение в реальном времени
+    if (endTime && !isPaused) {
       stopChakraCycle();
       stopBackgroundTone();
       if (fullChakraCycle) {
@@ -1071,7 +1069,7 @@
         document.querySelectorAll('.chakra-circle').forEach(c => c.classList.remove('active'));
         circle.classList.add('active');
         currentFrequency = chakra.hz;
-        if (!isPaused && endTime && !isMuted) {
+        if (endTime && !isPaused) {
           startBackgroundTone(currentFrequency);
         }
       });
@@ -1155,20 +1153,6 @@
 
   document.getElementById('pause-btn').addEventListener('click', pauseResumeSession);
   document.getElementById('stop-btn').addEventListener('click', resetToStart);
-  document.getElementById('mute-btn').addEventListener('click', () => {
-    isMuted = !isMuted;
-    if (isMuted) {
-      stopBackgroundTone();
-      document.getElementById('mute-btn').textContent = '🔈 Со звуком';
-    } else {
-      if (fullChakraCycle) {
-        startChakraCycle(totalMs);
-      } else if (!isPaused && endTime) {
-        startBackgroundTone(currentFrequency);
-      }
-      document.getElementById('mute-btn').textContent = '🔇 Без звука';
-    }
-  });
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
