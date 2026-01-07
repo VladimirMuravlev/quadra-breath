@@ -238,7 +238,7 @@
       cursor: pointer;
     }
 
-    /* === Марафон кнопки (аккуратные) === */
+    /* === Марафон кнопки === */
     .marathon-description {
       font-size: 1.05rem;
       opacity: 0.9;
@@ -256,7 +256,7 @@
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
       width: 100%;
-      max-width: 280px; /* Центрировано */
+      max-width: 280px;
       margin: 20px auto;
       padding: 8px;
     }
@@ -517,11 +517,9 @@
     document.head.appendChild(style);
   }
 
-  // === ГЛОБАЛЬНЫЕ ФЛАГИ МАРАФОНА ===
   let isMarathonSession = false;
   let marathonDay = null;
 
-  // === НАВИГАЦИЯ ===
   function showScreen(screenId) {
     if (location.hash === '#meditation' && screenId === 'main-screen') {
       stopSessionWithoutSaving();
@@ -574,7 +572,6 @@
     else showScreen('main-screen');
   });
 
-  // === ГРОМКОСТЬ ===
   function updateVolume(value) {
     hangVolumeLevel = parseFloat(value);
     if (audioContext && currentBackgroundGain) {
@@ -684,8 +681,11 @@
     progress.days[day] = today;
     localStorage.setItem('marathon_progress', JSON.stringify(progress));
     
-    // ✅ Автоматический переход на марафон
     showScreen('marathon-screen');
+    
+    setTimeout(() => {
+      renderMarathonButtons();
+    }, 10);
     
     showSessionCompletedModal(true);
   }
@@ -1024,7 +1024,6 @@
     }
   }
 
-  // === ЧАКРЫ ===
   const fullChakraCheckbox = document.getElementById('full-chakra-cycle');
 
   fullChakraCheckbox.addEventListener('change', () => {
@@ -1188,22 +1187,7 @@
 
   document.querySelector('.chakra-circle').classList.add('active');
 
-  // Инициализация
   renderChakraList();
   const initialHash = location.hash.replace('#', '');
   if (initialHash === 'meditation') showScreen('meditation-screen');
-  else if (initialHash === 'marathon') showScreen('marathon-screen');
-  else if (initialHash === 'help') showScreen('help-screen');
-  else if (initialHash === 'settings') showScreen('settings-screen');
-  else showScreen('main-screen');
-</script>
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
-    });
-  }
-</script>
-</body>
-</html>
+  else if (initialHash
