@@ -261,8 +261,8 @@
     }
 
     .marathon-day-btn {
-      width: 40px;
-      height: 40px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       background: rgba(22, 33, 62, 0.5);
       border: 3px solid rgba(76, 201, 240, 0.3);
@@ -683,9 +683,8 @@
     progress.days[day] = today;
     localStorage.setItem('marathon_progress', JSON.stringify(progress));
     
-    if (location.hash === '#marathon') {
-      renderMarathonButtons();
-    }
+    // ✅ КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: всегда переходим на марафон
+    showScreen('marathon-screen');
     
     showSessionCompletedModal(true);
   }
