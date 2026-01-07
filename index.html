@@ -10,7 +10,6 @@
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="theme-color" content="#1a1a2e">
-  <!-- ✅ Исправленная иконка -->
   <link rel="icon" href="image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%234cc9f0'/%3E%3C/svg%3E">
 
   <style>
@@ -779,7 +778,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('start-marathon-btn').addEventListener('click', startMarathon);
 
   function resetMarathon() {
-    localStorage.removeItem('marathon-progress');
+    localStorage.removeItem('marathon_progress');
     const progress = getMarathonProgress();
     if (!progress.active) {
       document.getElementById('marathon-start-section').classList.remove('hidden');
@@ -971,7 +970,6 @@ document.addEventListener('DOMContentLoaded', () => {
         isMarathonSession = false;
         marathonDay = null;
       } else {
-        // Возвращаем интерфейс для обычной медитации
         document.getElementById('duration-controls').classList.remove('hidden');
         document.getElementById('play-btn').classList.add('hidden');
         document.getElementById('session-controls').classList.add('hidden');
