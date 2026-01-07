@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Дыхательная практика спокойствия</title>
-  <meta name="description" content="Медитативная практика квадратного дыхания со звуками ханга и чакральными частотами для глубокого спокойствия">
+  <title>Квадратное Дыхание</title>
+  <meta name="description" content="Практика с звуками ханга и чакральными частотами">
 
   <!-- PWA manifest -->
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="theme-color" content="#1a1a2e">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%234cc9f0'/></svg>">
+  <!-- ✅ Исправленная иконка -->
+  <link rel="icon" href="image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%234cc9f0'/%3E%3C/svg%3E">
 
   <style>
     * {
@@ -237,7 +238,7 @@
       cursor: pointer;
     }
 
-    /* === Марафон кнопки === */
+    /* === Марафон === */
     .marathon-description {
       font-size: 1.05rem;
       opacity: 0.9;
@@ -256,8 +257,7 @@
       gap: 12px;
       width: 100%;
       max-width: 280px;
-      margin: 20px auto;
-      padding: 8px;
+      margin: 0 auto;
     }
 
     .marathon-day-btn {
@@ -281,11 +281,6 @@
       color: white;
       border-color: transparent;
       box-shadow: 0 4px 12px rgba(76, 201, 240, 0.3);
-    }
-
-    .marathon-day-btn:not(:disabled):not(.completed):hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(76, 201, 240, 0.4);
     }
 
     .marathon-day-btn:disabled {
@@ -382,9 +377,9 @@
 
 <!-- Главная -->
 <div id="main-screen" class="screen">
-  <h1>Дыхательная практика спокойствия</h1>
+  <h1>Квадратное Дыхание</h1>
   <button id="go-meditation-home" class="main-btn primary">Медитация</button>
-  <button id="go-marathon-home" class="main-btn secondary">Марафон 8&nbsp;дней</button>
+  <button id="go-marathon-home" class="main-btn secondary">Марафон 8 дней</button>
 </div>
 
 <!-- Медитация -->
@@ -426,16 +421,16 @@
   <h2>Марафон «8 дней спокойствия»</h2>
   
   <p class="marathon-description">
-    Пройдите 8 медитаций по порядку.<br>
-    Каждый день открывается после завершения предыдущего.
+    Каждый день — шаг к внутренней тишине.<br>
+    Завершите медитацию 8 дней подряд — и ваш цветок расцветёт 🌸
   </p>
 
   <div id="marathon-start-section">
     <button id="start-marathon-btn" class="main-btn primary">Начать марафон</button>
   </div>
 
-  <div id="marathon-days-container" class="hidden">
-    <div class="marathon-days-grid" id="marathon-days-grid"></div>
+  <div id="marathon-grid-container" class="hidden">
+    <div id="marathon-grid" class="marathon-grid"></div>
   </div>
 </div>
 
@@ -514,247 +509,20 @@
 </div>
 
 <script>
-  // === СТИЛИ ДЛЯ УВЕДОМЛЕНИЙ ===
+  // === ИНИЦИАЛИЗАЦИЯ ===
   if (!document.getElementById('notification-styles')) {
     const style = document.createElement('style');
     style.id = 'notification-styles';
     style.textContent = `
-      @keyframes fadeShow { 
-        from { opacity: 0; transform: translate(-50%, 10px); } 
-        to { opacity: 1; transform: translate(-50%, 0); } 
-      }
-      @keyframes fadeHide { 
-        from { opacity: 1; } 
-        to { opacity: 0; } 
-      }
+      @keyframes fadeShow { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+      @keyframes fadeHide { from { opacity: 1; } to { opacity: 0; } }
     `;
     document.head.appendChild(style);
   }
 
+  // === ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ===
   let isMarathonSession = false;
   let marathonDay = null;
-
-  function showScreen(screenId) {
-    if (location.hash === '#meditation' && screenId === 'main-screen') {
-      stopSessionWithoutSaving();
-    }
-
-    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.getElementById(screenId).classList.remove('hidden');
-    
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    if (screenId === 'main-screen') document.getElementById('nav-main').classList.add('active');
-    else if (screenId === 'meditation-screen') {
-      document.getElementById('nav-meditation').classList.add('active');
-      document.getElementById('meditation-volume').value = 0.3 * 50;
-      
-      if (endTime && !isPaused) {
-        document.getElementById('session-controls').classList.remove('hidden');
-      } else {
-        document.getElementById('session-controls').classList.add('hidden');
-      }
-    }
-    else if (screenId === 'marathon-screen') {
-      document.getElementById('nav-marathon').classList.add('active');
-      updateMarathonScreen();
-    }
-    else if (screenId === 'help-screen') document.getElementById('nav-help').classList.add('active');
-    else if (screenId === 'settings-screen') {
-      document.getElementById('nav-settings').classList.add('active');
-      renderChakraList();
-    }
-    
-    history.pushState(null, '', `#${screenId.replace('-screen', '')}`);
-  }
-
-  document.getElementById('nav-main').addEventListener('click', () => showScreen('main-screen'));
-  document.getElementById('nav-meditation').addEventListener('click', () => showScreen('meditation-screen'));
-  document.getElementById('nav-marathon').addEventListener('click', () => showScreen('marathon-screen'));
-  document.getElementById('nav-help').addEventListener('click', () => showScreen('help-screen'));
-  document.getElementById('nav-settings').addEventListener('click', () => showScreen('settings-screen'));
-
-  document.getElementById('go-meditation-home').addEventListener('click', () => showScreen('meditation-screen'));
-  document.getElementById('go-marathon-home').addEventListener('click', () => showScreen('marathon-screen'));
-
-  window.addEventListener('popstate', () => {
-    const hash = location.hash.replace('#', '');
-    if (hash === 'meditation') showScreen('meditation-screen');
-    else if (hash === 'marathon') showScreen('marathon-screen');
-    else if (hash === 'help') showScreen('help-screen');
-    else if (hash === 'settings') showScreen('settings-screen');
-    else showScreen('main-screen');
-  });
-
-  function updateVolume(value) {
-    hangVolumeLevel = parseFloat(value);
-    if (audioContext && currentBackgroundGain) {
-      const vol = (Math.pow(hangVolumeLevel / 50, 2) * 0.5 * 0.6) * 0.1;
-      currentBackgroundGain.gain.setValueAtTime(vol, audioContext.currentTime);
-    }
-  }
-
-  document.getElementById('breath-volume').addEventListener('input', (e) => {
-    updateVolume(e.target.value);
-    document.getElementById('meditation-volume').value = e.target.value;
-  });
-
-  document.getElementById('meditation-volume').addEventListener('input', (e) => {
-    updateVolume(e.target.value);
-    document.getElementById('breath-volume').value = e.target.value;
-  });
-
-  // === МАРАФОН ===
-  function getMarathonProgress() {
-    const data = localStorage.getItem('marathon_progress');
-    return data ? JSON.parse(data) : { 
-      active: false, 
-      days: {}, 
-      startDate: null,
-      completed: false 
-    };
-  }
-
-  function startMarathon() {
-    const progress = getMarathonProgress();
-    if (!progress.active) {
-      progress.active = true;
-      progress.startDate = new Date().toISOString().split('T')[0];
-      localStorage.setItem('marathon_progress', JSON.stringify(progress));
-    }
-    document.getElementById('marathon-start-section').classList.add('hidden');
-    document.getElementById('marathon-days-container').classList.remove('hidden');
-    renderMarathonButtons();
-  }
-
-  function renderMarathonButtons() {
-    const grid = document.getElementById('marathon-days-grid');
-    grid.innerHTML = '';
-    
-    const progress = getMarathonProgress();
-    let nextDay = 1;
-    
-    if (progress.active) {
-      for (let i = 1; i <= 8; i++) {
-        if (!progress.days[i]) {
-          nextDay = i;
-          break;
-        }
-        if (i === 8) nextDay = 9;
-      }
-    }
-
-    for (let i = 1; i <= 8; i++) {
-      const btn = document.createElement('button');
-      btn.className = 'marathon-day-btn';
-      btn.dataset.day = i;
-      
-      if (progress.active && progress.days[i]) {
-        btn.classList.add('completed');
-        btn.textContent = '🌸';
-        btn.disabled = true;
-      } else if (i < nextDay) {
-        btn.textContent = i;
-        btn.disabled = true;
-      } else if (i === nextDay && nextDay <= 8) {
-        btn.textContent = i;
-        btn.disabled = false;
-      } else {
-        btn.textContent = i;
-        btn.disabled = true;
-      }
-      
-      if (!btn.disabled && i <= 8) {
-        btn.addEventListener('click', () => startMarathonDay(i));
-      }
-      
-      grid.appendChild(btn);
-    }
-  }
-
-  function startMarathonDay(day) {
-    isMarathonSession = true;
-    marathonDay = day;
-    showScreen('meditation-screen');
-  }
-
-  function markMarathonDayCompleted(day) {
-    if (!endTime || Date.now() - startTime < totalMs - 1000) return;
-
-    const progress = getMarathonProgress();
-    if (!progress.active) {
-      progress.active = true;
-      progress.startDate = new Date().toISOString().split('T')[0];
-    }
-
-    const today = new Date().toISOString().split('T')[0];
-    if (progress.days[day] && progress.days[day] === today) {
-      return;
-    }
-
-    progress.days[day] = today;
-    localStorage.setItem('marathon_progress', JSON.stringify(progress));
-    
-    showScreen('marathon-screen');
-    
-    setTimeout(() => {
-      renderMarathonButtons();
-    }, 10);
-    
-    showSessionCompletedModal(true);
-  }
-
-  function updateMarathonScreen() {
-    const progress = getMarathonProgress();
-    if (progress.active) {
-      document.getElementById('marathon-start-section').classList.add('hidden');
-      document.getElementById('marathon-days-container').classList.remove('hidden');
-    } else {
-      document.getElementById('marathon-start-section').classList.remove('hidden');
-      document.getElementById('marathon-days-container').classList.add('hidden');
-    }
-    renderMarathonButtons();
-  }
-
-  document.getElementById('start-marathon-btn').addEventListener('click', startMarathon);
-
-  function resetMarathon() {
-    localStorage.removeItem('marathon_progress');
-    const progress = getMarathonProgress();
-    if (!progress.active) {
-      const startSection = document.getElementById('marathon-start-section');
-      const daysContainer = document.getElementById('marathon-days-container');
-      if (startSection && daysContainer) {
-        startSection.classList.remove('hidden');
-        daysContainer.classList.add('hidden');
-        renderMarathonButtons();
-      }
-    }
-    const notify = document.createElement('div');
-    notify.textContent = "Марафон сброшен. Начните заново в любое время.";
-    notify.style.cssText = `
-      position: fixed;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(22, 33, 62, 0.9);
-      color: #d0d0f5;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 0.95rem;
-      z-index: 200;
-      opacity: 0;
-      animation: fadeShow 0.3s forwards, fadeHide 0.3s forwards 2.7s;
-    `;
-    document.body.appendChild(notify);
-    setTimeout(() => {
-      if (notify.parentNode) notify.parentNode.removeChild(notify);
-    }, 3000);
-  }
-
-  document.getElementById('reset-marathon-btn').addEventListener('click', resetMarathon);
-
-  // === МЕДИТАЦИЯ ===
-  const phaseDuration = 4000;
   let totalMs = null;
   let endTime = null;
   let startTime = null;
@@ -767,9 +535,9 @@
   let fullChakraCycle = false;
   let chakraCycleInterval = null;
   let phaseStartTime = null;
-
   const BG_VOLUME = 0.05;
   let hangVolumeLevel = 0.3;
+  const phaseDuration = 4000;
 
   const sectors = [
     document.getElementById('segment1'),
@@ -808,6 +576,191 @@
   let currentBackgroundGain = null;
   let currentFrequency = 396;
 
+  // === НАВИГАЦИЯ ===
+  function showScreen(screenId) {
+    if (location.hash === '#meditation' && screenId === 'main-screen') {
+      stopSessionWithoutSaving();
+    }
+
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById(screenId).classList.remove('hidden');
+    
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    if (screenId === 'main-screen') document.getElementById('nav-main').classList.add('active');
+    else if (screenId === 'meditation-screen') {
+      document.getElementById('nav-meditation').classList.add('active');
+      document.getElementById('meditation-volume').value = hangVolumeLevel;
+      if (endTime && !isPaused) {
+        document.getElementById('session-controls').classList.remove('hidden');
+      } else {
+        document.getElementById('session-controls').classList.add('hidden');
+      }
+    }
+    else if (screenId === 'marathon-screen') {
+      document.getElementById('nav-marathon').classList.add('active');
+      updateMarathonScreen();
+    }
+    else if (screenId === 'help-screen') document.getElementById('nav-help').classList.add('active');
+    else if (screenId === 'settings-screen') {
+      document.getElementById('nav-settings').classList.add('active');
+      renderChakraList();
+    }
+    
+    history.pushState(null, '', `#${screenId.replace('-screen', '')}`);
+  }
+
+  // === ОБРАБОТЧИКИ НАВИГАЦИИ ===
+  document.getElementById('nav-main').addEventListener('click', () => showScreen('main-screen'));
+  document.getElementById('nav-meditation').addEventListener('click', () => showScreen('meditation-screen'));
+  document.getElementById('nav-marathon').addEventListener('click', () => showScreen('marathon-screen'));
+  document.getElementById('nav-help').addEventListener('click', () => showScreen('help-screen'));
+  document.getElementById('nav-settings').addEventListener('click', () => showScreen('settings-screen'));
+
+  document.getElementById('go-meditation-home').addEventListener('click', () => showScreen('meditation-screen'));
+  document.getElementById('go-marathon-home').addEventListener('click', () => showScreen('marathon-screen'));
+
+  window.addEventListener('popstate', () => {
+    const hash = location.hash.replace('#', '');
+    if (hash === 'meditation') showScreen('meditation-screen');
+    else if (hash === 'marathon') showScreen('marathon-screen');
+    else if (hash === 'help') showScreen('help-screen');
+    else if (hash === 'settings') showScreen('settings-screen');
+    else showScreen('main-screen');
+  });
+
+  // === ГРОМКОСТЬ ===
+  function updateVolume(value) {
+    hangVolumeLevel = parseFloat(value);
+    if (audioContext && currentBackgroundGain) {
+      const vol = (Math.pow(hangVolumeLevel / 50, 2) * 0.5 * 0.6) * 0.1;
+      currentBackgroundGain.gain.setValueAtTime(vol, audioContext.currentTime);
+    }
+  }
+
+  document.getElementById('breath-volume').addEventListener('input', (e) => {
+    updateVolume(e.target.value);
+    document.getElementById('meditation-volume').value = e.target.value;
+  });
+
+  document.getElementById('meditation-volume').addEventListener('input', (e) => {
+    updateVolume(e.target.value);
+    document.getElementById('breath-volume').value = e.target.value;
+  });
+
+  // === МАРАФОН ===
+  function getMarathonProgress() {
+    const data = localStorage.getItem('marathon_progress');
+    return data ? JSON.parse(data) : { 
+      active: false, 
+      days: {}, 
+      startDate: null,
+      completed: false 
+    };
+  }
+
+  function startMarathon() {
+    const progress = getMarathonProgress();
+    if (!progress.active) {
+      progress.active = true;
+      progress.startDate = new Date().toISOString().split('T')[0];
+      localStorage.setItem('marathon_progress', JSON.stringify(progress));
+    }
+    document.getElementById('marathon-start-section').classList.add('hidden');
+    document.getElementById('marathon-grid-container').classList.remove('hidden');
+    renderMarathonGrid();
+  }
+
+  function saveMarathonProgress(day) {
+    const progress = getMarathonProgress();
+    if (!progress.active) return;
+    if (day > 8) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const todayIndex = Math.floor((new Date(today) - new Date(progress.startDate)) / (1000 * 60 * 60 * 24)) + 1;
+    
+    if (todayIndex === day && (!progress.days[day] || progress.days[day] !== today)) {
+      progress.days[day] = today;
+      let completedCount = 0;
+      for (let i = 1; i <= 8; i++) {
+        if (progress.days[i]) completedCount++;
+      }
+      progress.completed = (completedCount >= 8);
+      localStorage.setItem('marathon_progress', JSON.stringify(progress));
+      
+      if (progress.completed) {
+        showCompletionModal();
+      } else {
+        showSessionCompletedModal(true);
+      }
+    }
+  }
+
+  function markDayCompleted(durationMs) {
+    if (!endTime || Date.now() - startTime < durationMs - 1000) return;
+    const progress = getMarathonProgress();
+    if (!progress.active) {
+      showSessionCompletedModal(false);
+      return;
+    }
+    const today = new Date().toISOString().split('T')[0];
+    const dayNumber = Math.floor((new Date(today) - new Date(progress.startDate)) / (1000 * 60 * 60 * 24)) + 1;
+    if (dayNumber >= 1 && dayNumber <= 8) {
+      saveMarathonProgress(dayNumber);
+    } else {
+      showSessionCompletedModal(false);
+    }
+  }
+
+  function renderMarathonGrid() {
+    const grid = document.getElementById('marathon-grid');
+    grid.innerHTML = '';
+    for (let i = 1; i <= 8; i++) {
+      const dayEl = document.createElement('div');
+      dayEl.className = 'marathon-day';
+      dayEl.textContent = i;
+      grid.appendChild(dayEl);
+    }
+    
+    const progress = getMarathonProgress();
+    if (progress.active) {
+      for (let i = 1; i <= 8; i++) {
+        if (progress.days[i]) {
+          const dayEl = grid.children[i - 1];
+          dayEl.textContent = '🌸';
+          dayEl.classList.add('completed');
+        }
+      }
+    }
+  }
+
+  function updateMarathonScreen() {
+    const progress = getMarathonProgress();
+    if (progress.active) {
+      document.getElementById('marathon-start-section').classList.add('hidden');
+      document.getElementById('marathon-grid-container').classList.remove('hidden');
+    } else {
+      document.getElementById('marathon-start-section').classList.remove('hidden');
+      document.getElementById('marathon-grid-container').classList.add('hidden');
+    }
+    renderMarathonGrid();
+  }
+
+  document.getElementById('start-marathon-btn').addEventListener('click', startMarathon);
+
+  function resetMarathon() {
+    localStorage.removeItem('marathon_progress');
+    const progress = getMarathonProgress();
+    if (!progress.active) {
+      document.getElementById('marathon-start-section').classList.remove('hidden');
+      document.getElementById('marathon-grid-container').classList.add('hidden');
+      renderMarathonGrid();
+    }
+    showMessage("Марафон сброшен.");
+  }
+
+  document.getElementById('reset-marathon-btn').addEventListener('click', resetMarathon);
+
+  // === МЕДИТАЦИЯ ===
   function buildChakraSequence() {
     const up = Array.from({length: 9}, (_, i) => i);
     const down = Array.from({length: 7}, (_, i) => 7 - i);
@@ -847,14 +800,10 @@
     });
   }
 
-  function initAudio() {
+  function startBackgroundTone(freq) {
     if (!audioContext) {
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
-  }
-
-  function startBackgroundTone(freq) {
-    initAudio();
     const now = audioContext.currentTime;
 
     if (currentBackgroundGain) {
@@ -965,13 +914,11 @@
       endTime = startTime + totalMs;
       isPaused = false;
       phaseStartTime = Date.now() - (Date.now() - startTime) % phaseDuration;
-      
       if (fullChakraCycle) {
         startChakraCycle(totalMs);
       } else {
         startBackgroundTone(currentFrequency);
       }
-      
       animateBreathCircle();
       document.getElementById('pause-btn').textContent = '⏸ Пауза';
     } else {
@@ -993,12 +940,8 @@
     stopBackgroundTone();
     stopChakraCycle();
     
-    if (location.hash === '#meditation' && totalMs) {
-      if (isMarathonSession && marathonDay) {
-        markMarathonDayCompleted(marathonDay);
-        isMarathonSession = false;
-        marathonDay = null;
-      }
+    if (location.hash === '#meditation' && selectedDuration) {
+      markDayCompleted(selectedDuration);
     }
   }
 
@@ -1021,12 +964,12 @@
     const stepMs = totalMs / sequence.length;
     let stepIndex = 0;
     currentFrequency = chakras[sequence[stepIndex]].hz;
-    startBackgroundTone(currentFrequency);
+    if (!isMuted) startBackgroundTone(currentFrequency);
     chakraCycleInterval = setInterval(() => {
       if (isPaused) return;
       stepIndex = (stepIndex + 1) % sequence.length;
       currentFrequency = chakras[sequence[stepIndex]].hz;
-      startBackgroundTone(currentFrequency);
+      if (!isMuted) startBackgroundTone(currentFrequency);
     }, stepMs);
   }
 
@@ -1037,15 +980,14 @@
     }
   }
 
+  // === ЧАКРЫ ===
   const fullChakraCheckbox = document.getElementById('full-chakra-cycle');
 
   fullChakraCheckbox.addEventListener('change', () => {
     fullChakraCycle = fullChakraCheckbox.checked;
-    
     if (fullChakraCycle) {
       document.querySelectorAll('.chakra-circle').forEach(c => c.classList.remove('active'));
     }
-    
     if (endTime && !isPaused) {
       stopChakraCycle();
       stopBackgroundTone();
@@ -1081,32 +1023,13 @@
 
       circle.addEventListener('click', () => {
         if (fullChakraCheckbox.checked) {
-          const notify = document.createElement('div');
-          notify.textContent = "Отключите «Полный цикл», чтобы выбрать частоту";
-          notify.style.cssText = `
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(22, 33, 62, 0.9);
-            color: #d0d0f5;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 0.95rem;
-            z-index: 200;
-            opacity: 0;
-            animation: fadeShow 0.3s forwards, fadeHide 0.3s forwards 2s;
-          `;
-          document.body.appendChild(notify);
-          setTimeout(() => {
-            if (notify.parentNode) notify.parentNode.removeChild(notify);
-          }, 2000);
+          showMessage("Отключите «Полный цикл», чтобы выбрать частоту");
           return;
         }
         document.querySelectorAll('.chakra-circle').forEach(c => c.classList.remove('active'));
         circle.classList.add('active');
         currentFrequency = chakra.hz;
-        if (endTime && !isPaused) {
+        if (!isPaused && endTime) {
           startBackgroundTone(currentFrequency);
         }
       });
@@ -1117,15 +1040,36 @@
     });
   }
 
+  function showMessage(text) {
+    const el = document.createElement('div');
+    el.textContent = text;
+    el.style.cssText = `
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(22, 33, 62, 0.9);
+      color: #d0d0f5;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 0.95rem;
+      z-index: 200;
+      opacity: 0;
+      animation: fadeShow 0.3s forwards, fadeHide 0.3s forwards 2.7s;
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }, 3000);
+  }
+
   function resetToStart() {
     stopSession();
     document.getElementById('timer').textContent = '00:00';
-    durationControls.classList.remove('hidden');
-    playBtn.classList.add('hidden');
-    sessionControls.classList.add('hidden');
     document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
+    document.getElementById('play-btn').classList.add('hidden');
+    document.getElementById('session-controls').classList.add('hidden');
     selectedDuration = null;
-    totalMs = null;
   }
 
   const durationControls = document.getElementById('duration-controls');
@@ -1134,9 +1078,7 @@
 
   document.querySelectorAll('#duration-controls button').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#duration-controls button').forEach(b => {
-        b.classList.remove('active');
-      });
+      document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       selectedDuration = parseInt(btn.dataset.mins) * 60 * 1000;
       playBtn.classList.remove('hidden');
@@ -1151,27 +1093,8 @@
     if (remaining <= 0) {
       remaining = 0;
       stopSession();
-      const notify = document.createElement('div');
-      notify.textContent = "Практика завершена. Спасибо за заботу о себе.";
-      notify.style.cssText = `
-        position: fixed;
-        bottom: 80px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(22, 33, 62, 0.9);
-        color: #d0d0f5;
-        padding: 10px 20px;
-        border-radius: 20px;
-        font-size: 0.95rem;
-        z-index: 200;
-        opacity: 0;
-        animation: fadeShow 0.3s forwards, fadeHide 0.3s forwards 3s;
-      `;
-      document.body.appendChild(notify);
-      setTimeout(() => {
-        if (notify.parentNode) notify.parentNode.removeChild(notify);
-        resetToStart();
-      }, 3000);
+      showMessage("Практика завершена. Спасибо за заботу о себе.");
+      setTimeout(resetToStart, 3000);
       return;
     }
     const mins = Math.floor(remaining / 60000);
@@ -1201,6 +1124,7 @@
   document.querySelector('.chakra-circle').classList.add('active');
 
   renderChakraList();
+  renderMarathonGrid();
   const initialHash = location.hash.replace('#', '');
   if (initialHash === 'meditation') showScreen('meditation-screen');
   else if (initialHash === 'marathon') showScreen('marathon-screen');
