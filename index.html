@@ -10,8 +10,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="theme-color" content="#1a1a2e">
-  <!-- ✅ Исправленная иконка -->
-  <link rel="icon" href="image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%234cc9f0'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%234cc9f0'/%3E%3C/svg%3E">
 
   <style>
     * {
@@ -238,7 +237,7 @@
       cursor: pointer;
     }
 
-    /* === Марафон === */
+    /* === Марафон кнопки === */
     .marathon-description {
       font-size: 1.05rem;
       opacity: 0.9;
@@ -429,8 +428,8 @@
     <button id="start-marathon-btn" class="main-btn primary">Начать марафон</button>
   </div>
 
-  <div id="marathon-grid-container" class="hidden">
-    <div id="marathon-grid" class="marathon-grid"></div>
+  <div id="marathon-days-container" class="hidden">
+    <div class="marathon-days-grid" id="marathon-days-grid"></div>
   </div>
 </div>
 
@@ -509,7 +508,7 @@
 </div>
 
 <script>
-  // === ИНИЦИАЛИЗАЦИЯ ===
+  // === СТИЛИ УВЕДОМЛЕНИЙ ===
   if (!document.getElementById('notification-styles')) {
     const style = document.createElement('style');
     style.id = 'notification-styles';
@@ -575,6 +574,30 @@
   let currentBackgroundOscillator = null;
   let currentBackgroundGain = null;
   let currentFrequency = 396;
+
+  // === УВЕДОМЛЕНИЕ ===
+  function showMessage(text) {
+    const el = document.createElement('div');
+    el.textContent = text;
+    el.style.cssText = `
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(22, 33, 62, 0.9);
+      color: #d0d0f5;
+      padding: 12px 20px;
+      border-radius: 20px;
+      font-size: 1rem;
+      z-index: 200;
+      opacity: 0;
+      animation: fadeShow 0.3s forwards, fadeHide 0.3s forwards 2.7s;
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }, 3000);
+  }
 
   // === НАВИГАЦИЯ ===
   function showScreen(screenId) {
@@ -666,83 +689,88 @@
       localStorage.setItem('marathon_progress', JSON.stringify(progress));
     }
     document.getElementById('marathon-start-section').classList.add('hidden');
-    document.getElementById('marathon-grid-container').classList.remove('hidden');
-    renderMarathonGrid();
+    document.getElementById('marathon-days-container').classList.remove('hidden');
+    renderMarathonButtons();
   }
 
-  function saveMarathonProgress(day) {
-    const progress = getMarathonProgress();
-    if (!progress.active) return;
-    if (day > 8) return;
-
-    const today = new Date().toISOString().split('T')[0];
-    const todayIndex = Math.floor((new Date(today) - new Date(progress.startDate)) / (1000 * 60 * 60 * 24)) + 1;
-    
-    if (todayIndex === day && (!progress.days[day] || progress.days[day] !== today)) {
-      progress.days[day] = today;
-      let completedCount = 0;
-      for (let i = 1; i <= 8; i++) {
-        if (progress.days[i]) completedCount++;
-      }
-      progress.completed = (completedCount >= 8);
-      localStorage.setItem('marathon_progress', JSON.stringify(progress));
-      
-      if (progress.completed) {
-        showCompletionModal();
-      } else {
-        showSessionCompletedModal(true);
-      }
-    }
-  }
-
-  function markDayCompleted(durationMs) {
-    if (!endTime || Date.now() - startTime < durationMs - 1000) return;
-    const progress = getMarathonProgress();
-    if (!progress.active) {
-      showSessionCompletedModal(false);
-      return;
-    }
-    const today = new Date().toISOString().split('T')[0];
-    const dayNumber = Math.floor((new Date(today) - new Date(progress.startDate)) / (1000 * 60 * 60 * 24)) + 1;
-    if (dayNumber >= 1 && dayNumber <= 8) {
-      saveMarathonProgress(dayNumber);
-    } else {
-      showSessionCompletedModal(false);
-    }
-  }
-
-  function renderMarathonGrid() {
-    const grid = document.getElementById('marathon-grid');
+  function renderMarathonButtons() {
+    const grid = document.getElementById('marathon-days-grid');
+    if (!grid) return;
     grid.innerHTML = '';
-    for (let i = 1; i <= 8; i++) {
-      const dayEl = document.createElement('div');
-      dayEl.className = 'marathon-day';
-      dayEl.textContent = i;
-      grid.appendChild(dayEl);
-    }
     
     const progress = getMarathonProgress();
+    let nextDay = 1;
+    
     if (progress.active) {
       for (let i = 1; i <= 8; i++) {
-        if (progress.days[i]) {
-          const dayEl = grid.children[i - 1];
-          dayEl.textContent = '🌸';
-          dayEl.classList.add('completed');
+        if (!progress.days[i]) {
+          nextDay = i;
+          break;
         }
+        if (i === 8) nextDay = 9;
       }
     }
+
+    for (let i = 1; i <= 8; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'marathon-day-btn';
+      btn.dataset.day = i;
+      
+      if (progress.active && progress.days[i]) {
+        btn.classList.add('completed');
+        btn.textContent = '🌸';
+        btn.disabled = true;
+      } else if (i === nextDay && nextDay <= 8) {
+        btn.textContent = i;
+        btn.disabled = false;
+        btn.addEventListener('click', () => startMarathonDay(i));
+      } else {
+        btn.textContent = i;
+        btn.disabled = true;
+      }
+      
+      grid.appendChild(btn);
+    }
+  }
+
+  function startMarathonDay(day) {
+    isMarathonSession = true;
+    marathonDay = day;
+    showScreen('meditation-screen');
+  }
+
+  function completeMarathonDay(day) {
+    if (!endTime || Date.now() - startTime < selectedDuration - 1000) return;
+
+    const progress = getMarathonProgress();
+    if (!progress.active) {
+      progress.active = true;
+      progress.startDate = new Date().toISOString().split('T')[0];
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    if (progress.days[day] && progress.days[day] === today) return;
+
+    progress.days[day] = today;
+    localStorage.setItem('marathon_progress', JSON.stringify(progress));
+
+    showMessage("Вы молодец! Хорошего вам дня!");
+    
+    setTimeout(() => {
+      showScreen('marathon-screen');
+    }, 2000);
   }
 
   function updateMarathonScreen() {
     const progress = getMarathonProgress();
     if (progress.active) {
       document.getElementById('marathon-start-section').classList.add('hidden');
-      document.getElementById('marathon-grid-container').classList.remove('hidden');
+      document.getElementById('marathon-days-container').classList.remove('hidden');
     } else {
       document.getElementById('marathon-start-section').classList.remove('hidden');
-      document.getElementById('marathon-grid-container').classList.add('hidden');
+      document.getElementById('marathon-days-container').classList.add('hidden');
     }
-    renderMarathonGrid();
+    renderMarathonButtons();
   }
 
   document.getElementById('start-marathon-btn').addEventListener('click', startMarathon);
@@ -752,8 +780,8 @@
     const progress = getMarathonProgress();
     if (!progress.active) {
       document.getElementById('marathon-start-section').classList.remove('hidden');
-      document.getElementById('marathon-grid-container').classList.add('hidden');
-      renderMarathonGrid();
+      document.getElementById('marathon-days-container').classList.add('hidden');
+      renderMarathonButtons();
     }
     showMessage("Марафон сброшен.");
   }
@@ -761,12 +789,6 @@
   document.getElementById('reset-marathon-btn').addEventListener('click', resetMarathon);
 
   // === МЕДИТАЦИЯ ===
-  function buildChakraSequence() {
-    const up = Array.from({length: 9}, (_, i) => i);
-    const down = Array.from({length: 7}, (_, i) => 7 - i);
-    return [...up, ...down];
-  }
-
   function playHangSound(frequency) {
     if (typeof window.AudioContext === 'undefined') return;
     if (!audioContext) {
@@ -941,7 +963,11 @@
     stopChakraCycle();
     
     if (location.hash === '#meditation' && selectedDuration) {
-      markDayCompleted(selectedDuration);
+      if (isMarathonSession && marathonDay) {
+        completeMarathonDay(marathonDay);
+        isMarathonSession = false;
+        marathonDay = null;
+      }
     }
   }
 
@@ -960,16 +986,16 @@
   function startChakraCycle(totalMs) {
     if (!fullChakraCycle) return;
     stopChakraCycle();
-    const sequence = buildChakraSequence();
+    const sequence = [0,1,2,3,4,5,6,7,8,7,6,5,4,3,2,1];
     const stepMs = totalMs / sequence.length;
     let stepIndex = 0;
     currentFrequency = chakras[sequence[stepIndex]].hz;
-    if (!isMuted) startBackgroundTone(currentFrequency);
+    startBackgroundTone(currentFrequency);
     chakraCycleInterval = setInterval(() => {
       if (isPaused) return;
       stepIndex = (stepIndex + 1) % sequence.length;
       currentFrequency = chakras[sequence[stepIndex]].hz;
-      if (!isMuted) startBackgroundTone(currentFrequency);
+      startBackgroundTone(currentFrequency);
     }, stepMs);
   }
 
@@ -1040,29 +1066,6 @@
     });
   }
 
-  function showMessage(text) {
-    const el = document.createElement('div');
-    el.textContent = text;
-    el.style.cssText = `
-      position: fixed;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(22, 33, 62, 0.9);
-      color: #d0d0f5;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 0.95rem;
-      z-index: 200;
-      opacity: 0;
-      animation: fadeShow 0.3s forwards, fadeHide 0.3s forwards 2.7s;
-    `;
-    document.body.appendChild(el);
-    setTimeout(() => {
-      if (el.parentNode) el.parentNode.removeChild(el);
-    }, 3000);
-  }
-
   function resetToStart() {
     stopSession();
     document.getElementById('timer').textContent = '00:00';
@@ -1121,10 +1124,7 @@
     }
   });
 
-  document.querySelector('.chakra-circle').classList.add('active');
-
   renderChakraList();
-  renderMarathonGrid();
   const initialHash = location.hash.replace('#', '');
   if (initialHash === 'meditation') showScreen('meditation-screen');
   else if (initialHash === 'marathon') showScreen('marathon-screen');
