@@ -741,7 +741,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function completeMarathonDay(day) {
-    if (!endTime || Date.now() - startTime < selectedDuration - 1000) return;
+   if (!endTime || !totalMs || Date.now() - startTime < totalMs - 1000) return;
 
     const progress = getMarathonProgress();
     if (!progress.active) {
