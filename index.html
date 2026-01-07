@@ -741,8 +741,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function completeMarathonDay(day) {
-   if (!endTime || !totalMs || Date.now() - startTime < totalMs - 1000) return;
-
     const progress = getMarathonProgress();
     if (!progress.active) {
       progress.active = true;
@@ -953,28 +951,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // === ИСПРАВЛЕНА ОСНОВНАЯ ОШИБКА ===
   function stopSession() {
+    const sessionEndTime = endTime;
+    const sessionStartTime = startTime;
+    const sessionTotalMs = totalMs;
+    const wasMarathon = isMarathonSession;
+    const day = marathonDay;
+
     if (timerInterval) clearInterval(timerInterval);
     if (phaseInterval) clearInterval(phaseInterval);
     timerInterval = null;
     phaseInterval = null;
     phaseStartTime = null;
     endTime = null;
+    startTime = null;
+    totalMs = null;
     isPaused = false;
     stopBackgroundTone();
     stopChakraCycle();
     
-    if (location.hash === '#meditation' && selectedDuration) {
-      if (isMarathonSession && marathonDay) {
-        completeMarathonDay(marathonDay);
-        isMarathonSession = false;
-        marathonDay = null;
-      } else {
-        document.getElementById('duration-controls').classList.remove('hidden');
-        document.getElementById('play-btn').classList.add('hidden');
-        document.getElementById('session-controls').classList.add('hidden');
+    if (wasMarathon && day && sessionTotalMs && sessionEndTime) {
+      if (Date.now() - sessionStartTime >= sessionTotalMs - 1000) {
+        completeMarathonDay(day);
       }
+    } else {
+      document.getElementById('duration-controls').classList.remove('hidden');
+      document.getElementById('play-btn').classList.add('hidden');
+      document.getElementById('session-controls').classList.add('hidden');
     }
+
+    resetToStart();
   }
 
   function stopSessionWithoutSaving() {
@@ -984,6 +991,8 @@ document.addEventListener('DOMContentLoaded', () => {
     phaseInterval = null;
     phaseStartTime = null;
     endTime = null;
+    startTime = null;
+    totalMs = null;
     isPaused = false;
     stopBackgroundTone();
     stopChakraCycle();
