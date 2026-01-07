@@ -523,7 +523,6 @@
       document.getElementById('nav-meditation').classList.add('active');
       document.getElementById('meditation-volume').value = hangVolumeLevel;
       
-      // ✅ ИСПРАВЛЕНИЕ: кнопки только при активной сессии
       if (endTime && !isPaused) {
         document.getElementById('session-controls').classList.remove('hidden');
       } else {
@@ -630,7 +629,9 @@
   }
 
   function markDayCompleted(durationMs) {
+    // ✅ Ключевая проверка: сессия завершена полностью
     if (!endTime || Date.now() - startTime < durationMs - 1000) return;
+    
     const progress = getMarathonProgress();
     if (!progress.active) {
       showSessionCompletedModal(false);
@@ -892,7 +893,7 @@
       s.style.background = '';
     });
 
-    totalMs = durationMs;
+    totalMs = durationMs; // ✅ Сохраняем длительность
     startTime = Date.now();
     endTime = startTime + totalMs;
     isPaused = false;
@@ -902,7 +903,6 @@
 
     playHangSound(hangNotes[currentPhaseIndex]);
     
-    // ✅ Звук всегда включён
     if (fullChakraCycle) {
       startChakraCycle(totalMs);
     } else {
@@ -958,8 +958,9 @@
     stopBackgroundTone();
     stopChakraCycle();
     
-    if (location.hash === '#meditation' && selectedDuration) {
-      markDayCompleted(selectedDuration);
+    // ✅ Передаём totalMs — фактическую длительность сессии
+    if (location.hash === '#meditation' && totalMs) {
+      markDayCompleted(totalMs);
     }
   }
 
@@ -1008,7 +1009,6 @@
       document.querySelectorAll('.chakra-circle').forEach(c => c.classList.remove('active'));
     }
     
-    // ✅ Применение в реальном времени
     if (endTime && !isPaused) {
       stopChakraCycle();
       stopBackgroundTone();
@@ -1088,6 +1088,7 @@
     sessionControls.classList.add('hidden');
     document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
     selectedDuration = null;
+    totalMs = null; // ✅ Сбрасываем
   }
 
   const durationControls = document.getElementById('duration-controls');
