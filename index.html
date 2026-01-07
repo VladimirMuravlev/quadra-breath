@@ -237,7 +237,7 @@
       cursor: pointer;
     }
 
-    /* === Марафон === */
+    /* === Марафон кнопки === */
     .marathon-description {
       font-size: 1.05rem;
       opacity: 0.9;
@@ -246,35 +246,38 @@
     }
 
     #marathon-start-section,
-    #marathon-grid-container {
+    #marathon-days-container {
       margin: 16px 0;
     }
 
-    .marathon-grid {
+    .marathon-days-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
+      gap: 12px;
       width: 100%;
       max-width: 320px;
       margin: 0 auto;
     }
 
-    .marathon-day {
+    .marathon-day-btn {
       aspect-ratio: 1;
-      min-height: 60px;
       border-radius: 50%;
       background: rgba(22, 33, 62, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      color: #a9a9d6;
       border: 2px solid rgba(76, 201, 240, 0.2);
+      color: #a9a9d6;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
     }
-    .marathon-day.completed {
+    .marathon-day-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+    .marathon-day-btn.completed {
       background: linear-gradient(135deg, #4361ee, #4cc9f0);
       color: white;
-      font-size: 2.2rem;
+      font-size: 2.0rem;
       border-color: transparent;
       box-shadow: 0 0 12px rgba(76, 201, 240, 0.5);
     }
@@ -403,16 +406,16 @@
   <h2>Марафон «8 дней спокойствия»</h2>
   
   <p class="marathon-description">
-    Каждый день — шаг к внутренней тишине.<br>
-    Завершите медитацию 8 дней подряд — и ваш цветок расцветёт 🌸
+    Пройдите 8 медитаций по порядку.<br>
+    Каждый день открывается после завершения предыдущего.
   </p>
 
   <div id="marathon-start-section">
     <button id="start-marathon-btn" class="main-btn primary">Начать марафон</button>
   </div>
 
-  <div id="marathon-grid-container" class="hidden">
-    <div id="marathon-grid" class="marathon-grid"></div>
+  <div id="marathon-days-container" class="hidden">
+    <div class="marathon-days-grid" id="marathon-days-grid"></div>
   </div>
 </div>
 
@@ -508,6 +511,10 @@
     document.head.appendChild(style);
   }
 
+  // === ГЛОБАЛЬНЫЕ ФЛАГИ МАРАФОНА ===
+  let isMarathonSession = false;
+  let marathonDay = null;
+
   // === НАВИГАЦИЯ ===
   function showScreen(screenId) {
     if (location.hash === '#meditation' && screenId === 'main-screen') {
@@ -599,89 +606,95 @@
       localStorage.setItem('marathon_progress', JSON.stringify(progress));
     }
     document.getElementById('marathon-start-section').classList.add('hidden');
-    document.getElementById('marathon-grid-container').classList.remove('hidden');
-    renderMarathonGrid();
+    document.getElementById('marathon-days-container').classList.remove('hidden');
+    renderMarathonButtons();
   }
 
-  function saveMarathonProgress(day) {
-    const progress = getMarathonProgress();
-    if (!progress.active) return;
-    if (day > 8) return;
-
-    const today = new Date().toISOString().split('T')[0];
-    const todayIndex = Math.floor((new Date(today) - new Date(progress.startDate)) / (1000 * 60 * 60 * 24)) + 1;
-    
-    if (todayIndex === day && (!progress.days[day] || progress.days[day] !== today)) {
-      progress.days[day] = today;
-      let completedCount = 0;
-      for (let i = 1; i <= 8; i++) {
-        if (progress.days[i]) completedCount++;
-      }
-      progress.completed = (completedCount >= 8);
-      localStorage.setItem('marathon_progress', JSON.stringify(progress));
-      
-      if (progress.completed) {
-        showCompletionModal();
-      } else {
-        showSessionCompletedModal(true);
-      }
-      
-      // ✅ КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: обновляем сетку, если находимся на странице марафона
-      if (location.hash === '#marathon') {
-        renderMarathonGrid();
-      }
-    }
-  }
-
-  function markDayCompleted(durationMs) {
-    if (!endTime || Date.now() - startTime < durationMs - 1000) return;
-    
-    const progress = getMarathonProgress();
-    if (!progress.active) {
-      showSessionCompletedModal(false);
-      return;
-    }
-    const today = new Date().toISOString().split('T')[0];
-    const dayNumber = Math.floor((new Date(today) - new Date(progress.startDate)) / (1000 * 60 * 60 * 24)) + 1;
-    if (dayNumber >= 1 && dayNumber <= 8) {
-      saveMarathonProgress(dayNumber);
-    } else {
-      showSessionCompletedModal(false);
-    }
-  }
-
-  function renderMarathonGrid() {
-    const grid = document.getElementById('marathon-grid');
+  function renderMarathonButtons() {
+    const grid = document.getElementById('marathon-days-grid');
     grid.innerHTML = '';
-    for (let i = 1; i <= 8; i++) {
-      const dayEl = document.createElement('div');
-      dayEl.className = 'marathon-day';
-      dayEl.textContent = i;
-      grid.appendChild(dayEl);
-    }
     
     const progress = getMarathonProgress();
+    let nextDay = 1;
+    
     if (progress.active) {
       for (let i = 1; i <= 8; i++) {
-        if (progress.days[i]) {
-          const dayEl = grid.children[i - 1];
-          dayEl.textContent = '🌸';
-          dayEl.classList.add('completed');
+        if (!progress.days[i]) {
+          nextDay = i;
+          break;
         }
+        if (i === 8) nextDay = 9;
       }
     }
+
+    for (let i = 1; i <= 8; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'marathon-day-btn';
+      btn.dataset.day = i;
+      
+      if (progress.active && progress.days[i]) {
+        btn.classList.add('completed');
+        btn.textContent = '🌸';
+        btn.disabled = true;
+      } else if (i < nextDay) {
+        btn.textContent = i;
+        btn.disabled = true;
+      } else if (i === nextDay && nextDay <= 8) {
+        btn.textContent = i;
+        btn.disabled = false;
+      } else {
+        btn.textContent = i;
+        btn.disabled = true;
+      }
+      
+      if (!btn.disabled && i <= 8) {
+        btn.addEventListener('click', () => startMarathonDay(i));
+      }
+      
+      grid.appendChild(btn);
+    }
+  }
+
+  function startMarathonDay(day) {
+    isMarathonSession = true;
+    marathonDay = day;
+    showScreen('meditation-screen');
+  }
+
+  function markMarathonDayCompleted(day) {
+    if (!endTime || Date.now() - startTime < totalMs - 1000) return;
+
+    const progress = getMarathonProgress();
+    if (!progress.active) {
+      progress.active = true;
+      progress.startDate = new Date().toISOString().split('T')[0];
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    if (progress.days[day] && progress.days[day] === today) {
+      return;
+    }
+
+    progress.days[day] = today;
+    localStorage.setItem('marathon_progress', JSON.stringify(progress));
+    
+    if (location.hash === '#marathon') {
+      renderMarathonButtons();
+    }
+    
+    showSessionCompletedModal(true);
   }
 
   function updateMarathonScreen() {
     const progress = getMarathonProgress();
     if (progress.active) {
       document.getElementById('marathon-start-section').classList.add('hidden');
-      document.getElementById('marathon-grid-container').classList.remove('hidden');
+      document.getElementById('marathon-days-container').classList.remove('hidden');
     } else {
       document.getElementById('marathon-start-section').classList.remove('hidden');
-      document.getElementById('marathon-grid-container').classList.add('hidden');
+      document.getElementById('marathon-days-container').classList.add('hidden');
     }
-    renderMarathonGrid();
+    renderMarathonButtons();
   }
 
   document.getElementById('start-marathon-btn').addEventListener('click', startMarathon);
@@ -691,11 +704,11 @@
     const progress = getMarathonProgress();
     if (!progress.active) {
       const startSection = document.getElementById('marathon-start-section');
-      const gridContainer = document.getElementById('marathon-grid-container');
-      if (startSection && gridContainer) {
+      const daysContainer = document.getElementById('marathon-days-container');
+      if (startSection && daysContainer) {
         startSection.classList.remove('hidden');
-        gridContainer.classList.add('hidden');
-        renderMarathonGrid();
+        daysContainer.classList.add('hidden');
+        renderMarathonButtons();
       }
     }
     const notify = document.createElement('div');
@@ -962,8 +975,15 @@
     stopBackgroundTone();
     stopChakraCycle();
     
+    // ✅ Проверка: марафон или обычная медитация
     if (location.hash === '#meditation' && totalMs) {
-      markDayCompleted(totalMs);
+      if (isMarathonSession && marathonDay) {
+        markMarathonDayCompleted(marathonDay);
+        isMarathonSession = false;
+        marathonDay = null;
+      } else {
+        // Обычная медитация — не влияет на марафон
+      }
     }
   }
 
