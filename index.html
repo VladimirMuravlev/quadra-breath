@@ -265,8 +265,6 @@
       width: 60px;
       height: 60px;
       border-radius: 50%;
-      background: rgba(22, 33, 62, 0.5);
-      border: 2px solid rgba(76, 201, 240, 0.3);
       color: #a9a9d6;
       font-size: 1.2rem;
       font-weight: 600;
@@ -275,11 +273,28 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      border: 2px solid rgba(76, 201, 240, 0.3);
+      background: rgba(22, 33, 62, 0.5);
     }
+
+    /* ✅ Активная кнопка — как основные кнопки */
+    .marathon-day-btn:not(:disabled):not(.completed) {
+      background: linear-gradient(120deg, #4361ee, #4cc9f0);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(76, 201, 240, 0.3);
+    }
+
+    .marathon-day-btn:not(:disabled):not(.completed):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(76, 201, 240, 0.4);
+    }
+
     .marathon-day-btn:disabled {
       cursor: not-allowed;
       opacity: 0.7;
     }
+
     .marathon-day-btn.completed {
       background: linear-gradient(135deg, #4361ee, #4cc9f0);
       color: white;
@@ -413,7 +428,7 @@
   
   <p class="marathon-description">
     Пройдите 8 медитаций по порядку.<br>
-    Каждый день открывается после завершения предыдущего. Жми на кружок ниже и начни свою медитацию
+    Каждый день открывается после завершения предыдущего.
   </p>
 
   <div id="marathon-start-section">
@@ -478,11 +493,11 @@
   <div id="chakra-mode">
     <label>
       <input type="checkbox" id="full-chakra-cycle">
-      Полный цикл чакр (вверх → вниз) для полной гармонии
+      Полный цикл чакр (вверх → вниз)
     </label>
   </div>
 
-  <h3 style="margin: 22px 0 14px; color: #a9a9d6;">Выбери чакру для проработки:</h3>
+  <h3 style="margin: 22px 0 14px; color: #a9a9d6;">Частоты чакр:</h3>
   <div id="chakra-list"></div>
 
   <button id="reset-marathon-btn" class="reset-btn">
@@ -561,7 +576,7 @@
   document.getElementById('nav-settings').addEventListener('click', () => showScreen('settings-screen'));
 
   document.getElementById('go-meditation-home').addEventListener('click', () => showScreen('meditation-screen'));
-  document.getElementById('go-marathon-home').addEventListener('click', () => showScreen('marathon-screen'));
+  document.getElementById('go-marathon-home').addEventListener('click', () ⇒ showScreen('marathon-screen'));
 
   window.addEventListener('popstate', () => {
     const hash = location.hash.replace('#', '');
@@ -1190,4 +1205,18 @@
   renderChakraList();
   const initialHash = location.hash.replace('#', '');
   if (initialHash === 'meditation') showScreen('meditation-screen');
-  else if (initialHash
+  else if (initialHash === 'marathon') showScreen('marathon-screen');
+  else if (initialHash === 'help') showScreen('help-screen');
+  else if (initialHash === 'settings') showScreen('settings-screen');
+  else showScreen('main-screen');
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
