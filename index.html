@@ -2,7 +2,6 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <!-- ✅ Запрещаем масштабирование -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Дыхательная практика спокойствия</title>
   <meta name="description" content="Медитативная практика квадратного дыхания со звуками ханга и чакральными частотами для глубокого спокойствия">
@@ -11,7 +10,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="theme-color" content="#1a1a2e">
-  <link rel="icon" href="image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%234cc9f0'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%234cc9f0'/></svg>">
 
   <style>
     * {
@@ -277,7 +276,6 @@
       background: rgba(22, 33, 62, 0.5);
     }
 
-    /* ✅ Активная кнопка — как основные кнопки */
     .marathon-day-btn:not(:disabled):not(.completed) {
       background: linear-gradient(120deg, #4361ee, #4cc9f0);
       color: white;
@@ -408,6 +406,7 @@
 
   <div class="section-title">Выбери время медитации</div>
   <div id="duration-controls" class="controls">
+    <button data-mins="1">1 минута</button>
     <button data-mins="10">10 минут</button>
     <button data-mins="20">20 минут</button>
     <button data-mins="30">30 минут</button>
@@ -547,7 +546,7 @@
     if (screenId === 'main-screen') document.getElementById('nav-main').classList.add('active');
     else if (screenId === 'meditation-screen') {
       document.getElementById('nav-meditation').classList.add('active');
-      document.getElementById('meditation-volume').value = hangVolumeLevel;
+      document.getElementById('meditation-volume').value = 0.3 * 50;
       
       if (endTime && !isPaused) {
         document.getElementById('session-controls').classList.remove('hidden');
@@ -563,7 +562,6 @@
     else if (screenId === 'settings-screen') {
       document.getElementById('nav-settings').classList.add('active');
       renderChakraList();
-      document.getElementById('breath-volume').value = hangVolumeLevel;
     }
     
     history.pushState(null, '', `#${screenId.replace('-screen', '')}`);
@@ -576,7 +574,7 @@
   document.getElementById('nav-settings').addEventListener('click', () => showScreen('settings-screen'));
 
   document.getElementById('go-meditation-home').addEventListener('click', () => showScreen('meditation-screen'));
-  document.getElementById('go-marathon-home').addEventListener('click', () ⇒ showScreen('marathon-screen'));
+  document.getElementById('go-marathon-home').addEventListener('click', () => showScreen('marathon-screen'));
 
   window.addEventListener('popstate', () => {
     const hash = location.hash.replace('#', '');
