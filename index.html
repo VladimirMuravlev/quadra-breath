@@ -395,7 +395,6 @@
   <div id="session-controls" class="controls hidden" style="margin-top: 16px;">
     <button id="pause-btn">⏸ Пауза</button>
     <button id="stop-btn">⏹ Стоп</button>
-    <button id="mute-btn">🔇 Без звука</button>
   </div>
 </div>
 
@@ -511,7 +510,6 @@
 
   // === НАВИГАЦИЯ ===
   function showScreen(screenId) {
-    // Останавливаем ТОЛЬКО при переходе на Главную
     if (location.hash === '#meditation' && screenId === 'main-screen') {
       stopSessionWithoutSaving();
     }
@@ -523,11 +521,12 @@
     if (screenId === 'main-screen') document.getElementById('nav-main').classList.add('active');
     else if (screenId === 'meditation-screen') {
       document.getElementById('nav-meditation').classList.add('active');
-      // Синхронизируем ползунок
       document.getElementById('meditation-volume').value = hangVolumeLevel;
-      // Показываем управление, если сессия активна
-      if (endTime || selectedDuration) {
+      
+      if (endTime && !isPaused) {
         document.getElementById('session-controls').classList.remove('hidden');
+      } else {
+        document.getElementById('session-controls').classList.add('hidden');
       }
     }
     else if (screenId === 'marathon-screen') {
@@ -562,10 +561,10 @@
     else showScreen('main-screen');
   });
 
-  // === ОБЩИЙ УПРАВЛЕНИЕ ГРОМКОСТЬЮ ===
+  // === ГРОМКОСТЬ ===
   function updateVolume(value) {
     hangVolumeLevel = parseFloat(value);
-    if (audioContext && !isMuted && currentBackgroundGain) {
+    if (audioContext && currentBackgroundGain) {
       const vol = (Math.pow(hangVolumeLevel / 50, 2) * 0.5 * 0.6) * 0.1;
       currentBackgroundGain.gain.setValueAtTime(vol, audioContext.currentTime);
     }
@@ -581,7 +580,7 @@
     document.getElementById('breath-volume').value = e.target.value;
   });
 
-  // === МАРАФОН (8 дней) ===
+  // === МАРАФОН ===
   function getMarathonProgress() {
     const data = localStorage.getItem('marathon_progress');
     return data ? JSON.parse(data) : { 
@@ -626,11 +625,17 @@
       } else {
         showSessionCompletedModal(true);
       }
+      
+      // ✅ КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: обновляем сетку, если находимся на странице марафона
+      if (location.hash === '#marathon') {
+        renderMarathonGrid();
+      }
     }
   }
 
   function markDayCompleted(durationMs) {
     if (!endTime || Date.now() - startTime < durationMs - 1000) return;
+    
     const progress = getMarathonProgress();
     if (!progress.active) {
       showSessionCompletedModal(false);
@@ -681,7 +686,6 @@
 
   document.getElementById('start-marathon-btn').addEventListener('click', startMarathon);
 
-  // === СБРОС МАРАФОНА ===
   function resetMarathon() {
     localStorage.removeItem('marathon_progress');
     const progress = getMarathonProgress();
@@ -725,7 +729,6 @@
   let startTime = null;
   let timerInterval = null;
   let phaseInterval = null;
-  let isMuted = false;
   let isPaused = false;
   let audioContext = null;
   let currentPhaseIndex = 0;
@@ -781,7 +784,7 @@
   }
 
   function playHangSound(frequency) {
-    if (isMuted || typeof window.AudioContext === 'undefined') return;
+    if (typeof window.AudioContext === 'undefined') return;
     if (!audioContext) {
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
@@ -820,7 +823,6 @@
   }
 
   function startBackgroundTone(freq) {
-    if (isMuted) return;
     initAudio();
     const now = audioContext.currentTime;
 
@@ -904,7 +906,12 @@
     selectedDuration = durationMs;
 
     playHangSound(hangNotes[currentPhaseIndex]);
-    if (!isMuted) startBackgroundTone(currentFrequency);
+    
+    if (fullChakraCycle) {
+      startChakraCycle(totalMs);
+    } else {
+      startBackgroundTone(currentFrequency);
+    }
 
     phaseInterval = setInterval(() => {
       if (isPaused) return;
@@ -918,7 +925,6 @@
     updateTimer();
 
     document.getElementById('pause-btn').textContent = '⏸ Пауза';
-    document.getElementById('mute-btn').textContent = isMuted ? '🔈 Со звуком' : '🔇 Без звука';
   }
 
   function pauseResumeSession() {
@@ -928,10 +934,13 @@
       endTime = startTime + totalMs;
       isPaused = false;
       phaseStartTime = Date.now() - (Date.now() - startTime) % phaseDuration;
-      if (!isMuted) {
-        if (fullChakraCycle) startChakraCycle(totalMs);
-        else startBackgroundTone(currentFrequency);
+      
+      if (fullChakraCycle) {
+        startChakraCycle(totalMs);
+      } else {
+        startBackgroundTone(currentFrequency);
       }
+      
       animateBreathCircle();
       document.getElementById('pause-btn').textContent = '⏸ Пауза';
     } else {
@@ -953,8 +962,8 @@
     stopBackgroundTone();
     stopChakraCycle();
     
-    if (location.hash === '#meditation' && selectedDuration) {
-      markDayCompleted(selectedDuration);
+    if (location.hash === '#meditation' && totalMs) {
+      markDayCompleted(totalMs);
     }
   }
 
@@ -977,12 +986,12 @@
     const stepMs = totalMs / sequence.length;
     let stepIndex = 0;
     currentFrequency = chakras[sequence[stepIndex]].hz;
-    if (!isMuted) startBackgroundTone(currentFrequency);
+    startBackgroundTone(currentFrequency);
     chakraCycleInterval = setInterval(() => {
       if (isPaused) return;
       stepIndex = (stepIndex + 1) % sequence.length;
       currentFrequency = chakras[sequence[stepIndex]].hz;
-      if (!isMuted) startBackgroundTone(currentFrequency);
+      startBackgroundTone(currentFrequency);
     }, stepMs);
   }
 
@@ -998,8 +1007,19 @@
 
   fullChakraCheckbox.addEventListener('change', () => {
     fullChakraCycle = fullChakraCheckbox.checked;
+    
     if (fullChakraCycle) {
       document.querySelectorAll('.chakra-circle').forEach(c => c.classList.remove('active'));
+    }
+    
+    if (endTime && !isPaused) {
+      stopChakraCycle();
+      stopBackgroundTone();
+      if (fullChakraCycle) {
+        startChakraCycle(totalMs);
+      } else {
+        startBackgroundTone(currentFrequency);
+      }
     }
   });
 
@@ -1052,7 +1072,7 @@
         document.querySelectorAll('.chakra-circle').forEach(c => c.classList.remove('active'));
         circle.classList.add('active');
         currentFrequency = chakra.hz;
-        if (!isPaused && endTime && !isMuted) {
+        if (endTime && !isPaused) {
           startBackgroundTone(currentFrequency);
         }
       });
@@ -1071,13 +1091,13 @@
     sessionControls.classList.add('hidden');
     document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
     selectedDuration = null;
+    totalMs = null;
   }
 
   const durationControls = document.getElementById('duration-controls');
   const playBtn = document.getElementById('play-btn');
   const sessionControls = document.getElementById('session-controls');
 
-  // === ВЫБОР ВРЕМЕНИ ===
   document.querySelectorAll('#duration-controls button').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('#duration-controls button').forEach(b => {
@@ -1137,20 +1157,6 @@
 
   document.getElementById('pause-btn').addEventListener('click', pauseResumeSession);
   document.getElementById('stop-btn').addEventListener('click', resetToStart);
-  document.getElementById('mute-btn').addEventListener('click', () => {
-    isMuted = !isMuted;
-    if (isMuted) {
-      stopBackgroundTone();
-      document.getElementById('mute-btn').textContent = '🔈 Со звуком';
-    } else {
-      if (fullChakraCycle) {
-        startChakraCycle(totalMs);
-      } else if (!isPaused && endTime) {
-        startBackgroundTone(currentFrequency);
-      }
-      document.getElementById('mute-btn').textContent = '🔇 Без звука';
-    }
-  });
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
