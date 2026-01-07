@@ -237,7 +237,7 @@
       cursor: pointer;
     }
 
-    /* === Марафон кнопки === */
+    /* === Марафон кнопки (увеличенные) === */
     .marathon-description {
       font-size: 1.05rem;
       opacity: 0.9;
@@ -253,33 +253,38 @@
     .marathon-days-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
+      gap: 16px;
       width: 100%;
       max-width: 320px;
-      margin: 0 auto;
+      margin: 16px auto;
+      padding: 8px;
     }
 
     .marathon-day-btn {
-      aspect-ratio: 1;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       background: rgba(22, 33, 62, 0.5);
-      border: 2px solid rgba(76, 201, 240, 0.2);
+      border: 3px solid rgba(76, 201, 240, 0.3);
       color: #a9a9d6;
-      font-size: 1.2rem;
+      font-size: 1.4rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .marathon-day-btn:disabled {
       cursor: not-allowed;
-      opacity: 0.5;
+      opacity: 0.6;
     }
     .marathon-day-btn.completed {
       background: linear-gradient(135deg, #4361ee, #4cc9f0);
       color: white;
       font-size: 2.0rem;
       border-color: transparent;
-      box-shadow: 0 0 12px rgba(76, 201, 240, 0.5);
+      box-shadow: 0 0 15px rgba(76, 201, 240, 0.6);
     }
 
     #chakra-list {
@@ -975,14 +980,11 @@
     stopBackgroundTone();
     stopChakraCycle();
     
-    // ✅ Проверка: марафон или обычная медитация
     if (location.hash === '#meditation' && totalMs) {
       if (isMarathonSession && marathonDay) {
         markMarathonDayCompleted(marathonDay);
         isMarathonSession = false;
         marathonDay = null;
-      } else {
-        // Обычная медитация — не влияет на марафон
       }
     }
   }
