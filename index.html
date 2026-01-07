@@ -2,7 +2,8 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <!-- ✅ Запрещаем масштабирование -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Дыхательная практика спокойствия</title>
   <meta name="description" content="Медитативная практика квадратного дыхания со звуками ханга и чакральными частотами для глубокого спокойствия">
 
@@ -237,7 +238,7 @@
       cursor: pointer;
     }
 
-    /* === Марафон кнопки (увеличенные) === */
+    /* === Марафон кнопки (аккуратные) === */
     .marathon-description {
       font-size: 1.05rem;
       opacity: 0.9;
@@ -253,21 +254,21 @@
     .marathon-days-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
+      gap: 12px;
       width: 100%;
-      max-width: 320px;
-      margin: 16px auto;
+      max-width: 280px; /* Центрировано */
+      margin: 20px auto;
       padding: 8px;
     }
 
     .marathon-day-btn {
-      width: 80px;
-      height: 80px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       background: rgba(22, 33, 62, 0.5);
-      border: 3px solid rgba(76, 201, 240, 0.3);
+      border: 2px solid rgba(76, 201, 240, 0.3);
       color: #a9a9d6;
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
@@ -277,14 +278,14 @@
     }
     .marathon-day-btn:disabled {
       cursor: not-allowed;
-      opacity: 0.6;
+      opacity: 0.7;
     }
     .marathon-day-btn.completed {
       background: linear-gradient(135deg, #4361ee, #4cc9f0);
       color: white;
-      font-size: 2.0rem;
+      font-size: 1.8rem;
       border-color: transparent;
-      box-shadow: 0 0 15px rgba(76, 201, 240, 0.6);
+      box-shadow: 0 0 12px rgba(76, 201, 240, 0.5);
     }
 
     #chakra-list {
@@ -683,7 +684,7 @@
     progress.days[day] = today;
     localStorage.setItem('marathon_progress', JSON.stringify(progress));
     
-    // ✅ КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: всегда переходим на марафон
+    // ✅ Автоматический переход на марафон
     showScreen('marathon-screen');
     
     showSessionCompletedModal(true);
