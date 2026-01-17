@@ -400,7 +400,7 @@
 
   <div class="section-title">Выбери время медитации</div>
   <div id="duration-controls" class="controls">
-  
+    <button data-mins="1">1 минута</button>
     <button data-mins="10">10 минут</button>
     <button data-mins="20">20 минут</button>
     <button data-mins="30">30 минут</button>
@@ -486,11 +486,11 @@
   <div id="chakra-mode">
     <label>
       <input type="checkbox" id="full-chakra-cycle">
-      Полный цикл чакр (вверх → вниз]. Полная гармония всех чакр
+      Полный цикл чакр (вверх → вниз)
     </label>
   </div>
 
-  <h3 style="margin: 22px 0 14px; color: #a9a9d6;">Выбери чакру для проработки:</h3>
+  <h3 style="margin: 22px 0 14px; color: #a9a9d6;">Частоты чакр:</h3>
   <div id="chakra-list"></div>
 
   <button id="reset-marathon-btn" class="reset-btn">
@@ -575,6 +575,52 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentBackgroundOscillator = null;
   let currentBackgroundGain = null;
   let currentFrequency = 396;
+
+  // === ЗВУК КОЛОКОЛЬЧИКА ===
+  function playBellSound() {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    
+    const now = audioContext.currentTime;
+    const duration = 0.8;
+    const baseFreq = 880;
+    
+    const partials = [
+      { freq: baseFreq, amp: 0.6, decay: 0.8 },
+      { freq: baseFreq * 1.5, amp: 0.3, decay: 0.5 },
+      { freq: baseFreq * 2.0, amp: 0.2, decay: 0.3 }
+    ];
+    
+    partials.forEach(p => {
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.value = p.freq;
+      
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(p.amp * 0.3, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + p.decay);
+      
+      osc.connect(gain);
+      gain.connect(audioContext.destination);
+      
+      osc.start(now);
+      osc.stop(now + duration);
+    });
+  }
+
+  function playTripleBell() {
+    let count = 0;
+    const interval = setInterval(() => {
+      playBellSound();
+      count++;
+      if (count >= 3) {
+        clearInterval(interval);
+      }
+    }, 1000);
+  }
 
   // === УВЕДОМЛЕНИЕ ===
   function showMessage(text) {
@@ -951,7 +997,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // === ИСПРАВЛЕНА ОСНОВНАЯ ОШИБКА ===
+  // === ИСПРАВЛЕНО: восстановление кнопок + колокольчик ===
   function stopSession() {
     const sessionEndTime = endTime;
     const sessionStartTime = startTime;
@@ -974,14 +1020,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (wasMarathon && day && sessionTotalMs && sessionEndTime) {
       if (Date.now() - sessionStartTime >= sessionTotalMs - 1000) {
         completeMarathonDay(day);
+        playTripleBell(); // ← колокольчик
       }
     } else {
-      document.getElementById('duration-controls').classList.remove('hidden');
-      document.getElementById('play-btn').classList.add('hidden');
-      document.getElementById('session-controls').classList.add('hidden');
+      playTripleBell(); // ← колокольчик и для обычной медитации
     }
 
-    resetToStart();
+    // Восстанавливаем интерфейс
+    document.getElementById('timer').textContent = '00:00';
+    document.getElementById('duration-controls').classList.remove('hidden');
+    document.getElementById('play-btn').classList.add('hidden');
+    document.getElementById('session-controls').classList.add('hidden');
+    document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
   }
 
   function stopSessionWithoutSaving() {
@@ -1083,8 +1133,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function resetToStart() {
     document.getElementById('timer').textContent = '00:00';
+    document.getElementById('duration-controls').classList.remove('hidden');
+    document.getElementById('play-btn').classList.add('hidden');
+    document.getElementById('session-controls').classList.add('hidden');
     document.querySelectorAll('#duration-controls button').forEach(b => b.classList.remove('active'));
-    selectedDuration = null;
   }
 
   const durationControls = document.getElementById('duration-controls');
@@ -1109,10 +1161,6 @@ document.addEventListener('DOMContentLoaded', () => {
       remaining = 0;
       stopSession();
       showMessage("Практика завершена. Спасибо за заботу о себе.");
-      setTimeout(() => {
-        resetToStart();
-        document.getElementById('session-controls').classList.add('hidden');
-      }, 3000);
       return;
     }
     const mins = Math.floor(remaining / 60000);
